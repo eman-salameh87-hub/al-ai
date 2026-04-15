@@ -6,11 +6,12 @@
 <title>al-ai.ai | About us</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Oswald:wght@200..700&display=swap" rel="stylesheet">
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Oswald:wght@200..700&display=swap&font-display=swap" rel="stylesheet"/>
+<!-- Preload critical resources in parallel with HTML parsing -->
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" as="script" crossorigin/>
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" as="script" crossorigin/>
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js" as="script" crossorigin/>
+<link rel="preload" href="logo1.png" as="image"/>
 
 <style>
 /* ═══════════════════════════════
@@ -322,17 +323,14 @@ h1 { font-size: clamp(3rem, 10vw, 7rem); font-family: "Oswald", sans-serif; text
 @keyframes scan { 0% { left: 0%; } 100% { left: 100%; } }
 
 
-/* ═══════════════════════════════
-   HAMBURGER & MOBILE MENU STYLES
-   ═══════════════════════════════ */
+/* Hamburger & mobile menu styles */
 .hamburger {
     display: none;
     flex-direction: column;
     gap: 6px;
     cursor: pointer;
-    z-index: 105; 
+    z-index: 105;
 }
-
 .hamburger span {
     width: 28px; height: 2px;
     background-color: #f0e8ff;
@@ -340,129 +338,18 @@ h1 { font-size: clamp(3rem, 10vw, 7rem); font-family: "Oswald", sans-serif; text
     display: block;
     box-shadow: 0 0 5px rgba(168, 85, 247, 0.4);
 }
-
 .hamburger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
 .hamburger.active span:nth-child(2) { opacity: 0; }
 .hamburger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
-/* Mobile Slide Menu */
 .mobile-slide-menu {
     position: fixed;
-    top: 0; right: -100%; 
+    top: 0; right: -100%;
     width: 100%; max-width: 320px;
     height: 100vh;
     background: rgba(5, 5, 5, 0.95);
     backdrop-filter: blur(20px);
-    z-index: 104; 
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 30px;
-    transition: right 0.5s cubic-bezier(0.77, 0, 0.175, 1);
-    border-left: 1px solid rgba(168, 85, 247, 0.2);
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.8);
-}
-
-.mobile-slide-menu.active { right: 0; }
-
-/* Close X Button */
-.close-menu {
-    position: absolute;
-    top: 30px; right: 30px;
-    width: 35px; height: 35px;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-.close-menu:hover { transform: rotate(180deg) scale(1.1); }
-.close-menu span {
-    position: absolute;
-    width: 26px; height: 2px;
-    background: #f0e8ff;
-    box-shadow: 0 0 8px rgba(168, 85, 247, 0.8);
-}
-.close-menu span:first-child { transform: rotate(45deg); }
-.close-menu span:last-child { transform: rotate(-45deg); }
-
-/* Creative Reveal for Menu Items */
-.mobile-slide-menu .menu-item {
-    text-decoration: none;
-    color: #f0e8ff;
-    font-size: 1.3rem;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    opacity: 0;
-    transform: translateX(60px);
-    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-.mobile-slide-menu.active .menu-item {
-    opacity: 1;
-    transform: translateX(0);
-    transition-delay: calc(0.1s * var(--i));
-}
-
-.mobile-slide-menu a.menu-item:hover { color: #ffd023; transform: scale(1.05) translateX(0); }
-
-/* Container for Contact inside Menu */
-.menu-contact-container {
-    margin-top: 20px;
-    opacity: 0;
-    transform: translateY(40px);
-    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-.mobile-slide-menu.active .menu-contact-container {
-    opacity: 1;
-    transform: translateY(0);
-    transition-delay: calc(0.1s * var(--i));
-}
-
-.header-contact { display: block; }
-@media (max-width: 600px) {
-    .links-block { flex-direction: column; gap: 30px; }
-}
-
-@media (max-width: 1024px) {
-    .fg-left { border-right: none; padding-right: 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 40px; }
-    .footer-avant-garde { flex-direction: column; gap: 40px; padding-top: 5vh; }
-}
-
-
-/* ═══════════════════════════════
-   HAMBURGER & MOBILE MENU STYLES
-   ═══════════════════════════════ */
-.hamburger {
-    display: none;
-    flex-direction: column;
-    gap: 6px;
-    cursor: pointer;
-    z-index: 105; 
-}
-
-.hamburger span {
-    width: 28px; height: 2px;
-    background-color: #f0e8ff;
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    display: block;
-    box-shadow: 0 0 5px rgba(168, 85, 247, 0.4);
-}
-
-.hamburger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
-.hamburger.active span:nth-child(2) { opacity: 0; }
-.hamburger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
-
-/* Mobile Slide Menu */
-.mobile-slide-menu {
-    position: fixed;
-    top: 0; right: -100%; 
-    width: 100%; max-width: 320px;
-    height: 100vh;
-    background: rgba(5, 5, 5, 0.95);
-    backdrop-filter: blur(20px);
-    z-index: 104; 
+    z-index: 104;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -576,7 +463,7 @@ h1 { font-size: clamp(3rem, 10vw, 7rem); font-family: "Oswald", sans-serif; text
 <div id="page-loader"><div style="color:#f0e8ff; font-weight:700; letter-spacing:0.2em; font-size:1.5rem;">LOADING...</div></div>
 
 <header class="main-header">
-  <div class="logo"><a href="index.html"><img src="logo1.png" alt="AL-AI.AI" /></a></div>
+  <div class="logo"><a href="index.html"><img src="logo1.png" alt="AL-AI.AI" fetchpriority="high" /></a></div>
 
   <nav class="nav-center">
     <a href="about.html">About Us</a>
@@ -684,7 +571,7 @@ h1 { font-size: clamp(3rem, 10vw, 7rem); font-family: "Oswald", sans-serif; text
         <div class="footer-avant-garde">
             <div class="fg-pane fg-left">
                 <span class="cell-label">01 / Identity</span>
-                <div class="footer-logo-box"><img src="logo1.png" alt="AL-AI.AI" /></div>
+                <div class="footer-logo-box"><img src="logo1.png" alt="AL-AI.AI" loading="lazy" /></div>
                 <h2 class="cyber-heading">DOMINATE<br>THE NOISE</h2>
                 <p class="footer-mission">Looking to the current scene of Ai Domain and agentic Horizons, With the daily hypes (if not hourly) that keep showing, the volume and versions of terms and concepts it have.
  You will be overwhelmed.</p>
@@ -727,6 +614,24 @@ h1 { font-size: clamp(3rem, 10vw, 7rem); font-family: "Oswald", sans-serif; text
     </footer>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<!-- Dismiss loader as soon as scripts are ready — don't wait for images/fonts -->
+<script>
+(function() {
+    function dismissLoader() {
+        var loader = document.getElementById('page-loader');
+        if (loader) loader.classList.add('hidden');
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() { setTimeout(dismissLoader, 50); });
+    } else {
+        setTimeout(dismissLoader, 50);
+    }
+})();
+</script>
+
 <script>
 /* ═══════════════════════════════
    CORE VISUALS (Three.js & GSAP)
@@ -751,6 +656,7 @@ function initThree() {
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas'), alpha: true, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     
     const starGeometry = new THREE.BufferGeometry();
     const posArray = new Float32Array(3000 * 3);
@@ -771,7 +677,9 @@ function initThree() {
     const blobCam = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
     blobCam.position.z = 20;
 
-    const blobRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const blobRenderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
+    // Pixel ratio 1 is sufficient for this blurred decorative blob — halves GPU work on retina
+    blobRenderer.setPixelRatio(1);
     blobRenderer.setSize(500, 500);
     blobContainer.appendChild(blobRenderer.domElement);
 
@@ -847,6 +755,8 @@ const blobMat = new THREE.ShaderMaterial({
 
     function animateAll(time) {
         requestAnimationFrame(animateAll);
+        // Skip rendering when tab is not visible — saves CPU/GPU
+        if (document.hidden) return;
         const t = time * 0.001;
         
         // Stars
@@ -901,15 +811,19 @@ window.addEventListener('load', () => {
         }
     );
 
-    document.getElementById('page-loader').classList.add('hidden');
+    document.getElementById('page-loader').classList.add('hidden'); // kept as safety fallback
 });
 
+let _resizeTimer = null;
 window.addEventListener('resize', () => {
-    if(camera) {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    }
+    clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(() => {
+        if(camera) {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+    }, 150);
 });
 </script>
 
