@@ -849,7 +849,7 @@ body {
         <div id="canvas-container"></div>
 
         <div class="content">
-            <h1>Core Pillars</h1>
+            <h1>Resources</h1>
         </div>
 
         <div class="pillars-wrapper">
@@ -1281,7 +1281,7 @@ if (hamburger && mobileMenu && closeMenuBtn) {
         container.appendChild(renderer.domElement);
 
         /* ── High-res sphere for smooth blob distortion ── */
-        const geo = new THREE.SphereGeometry(5.4, 256, 256);
+        const geo = new THREE.SphereGeometry(4.2, 256, 256);
 
         const mat = new THREE.ShaderMaterial({
             uniforms: {
@@ -1439,7 +1439,7 @@ if (hamburger && mobileMenu && closeMenuBtn) {
             // Bounds based on camera FOV at blob's z depth
             const halfH = Math.tan((42 / 2) * Math.PI / 180) * (camera.position.z - blob.position.z);
             const halfW = halfH * (w / h);
-            const blobR = 5.4; // approximate visual radius in world units
+            const blobR = 4.2; // approximate visual radius in world units
 
             const xMin = -halfW + blobR * 0.6;
             const xMax =  halfW - blobR * 0.6;
