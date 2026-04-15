@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>al-ai.ai | Our Manifesto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+<style>
+    
+/* ═══════════════════════════════
+   CORE STYLES
+   ═══════════════════════════════ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* [FIX] تم تغيير overflow إلى auto لضمان عمل التمرير الطبيعي للمتصفح 
+*/
+body { 
+    width: 100%; 
+    font-family: "Google Sans Code", monospace; 
+    overflow-x: hidden; 
+    overflow-y: auto; 
+    /* Transition from a very dark navy/black to a deep royal purple */
+    background: linear-gradient(to bottom, #06010e 0%, #0d0225 25%, #180540 55%, #2a0a5e 80%, #3b0f7a 100%);
+}
+
+#page-loader { position: fixed; inset: 0; z-index: 9999; background: #000000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.9s ease; }
+#page-loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+/* RESPONSIVE HEADER */
+.main-header { position: fixed; top: 0; left: 0; width: 100%; height: 80px; display: flex; align-items: center; justify-content: space-between; padding: 0 5%; z-index: 103; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(225, 225, 225, 0.1); }
+
+.logo img { width: clamp(90px, 12vw, 120px); filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.4)); } 
+.nav-center { display: flex; gap: clamp(15px, 3vw, 40px); position: absolute; left: 50%; transform: translateX(-50%); }
+.nav-center a { text-decoration: none; color: #fff; font-size: clamp(0.75rem, 1.5vw, 0.9rem); transition: 0.3s; cursor: pointer; letter-spacing: 0.01em; white-space: nowrap; }
+
+/* [FIX] تحويل الـ Canvas إلى Fixed ليبقى في الخلفية أثناء التمرير الطبيعي */
+#canvas { 
+    position: fixed; 
+    inset: 0; 
+    z-index: -1; 
+}
+
+.vignette { 
+    position: fixed; 
+    inset: 0; 
+    pointer-events: none; 
+    z-index: 0; 
+    background: radial-gradient(ellipse 65% 65% at 50% 50%, transparent 5%, rgba(0,0,0,0.75) 100%); 
+}
+
+/* [FIX] جعل الحاوية تتمدد طبيعياً مع المحتوى بدلاً من تثبيت الطول (720vh)
+*/
+#scroll-wrapper { 
+    position: relative; 
+    width: 100%; 
+    min-height: 100vh;
+}
+
+#viewport-container { 
+    position: relative; 
+    width: 100%; 
+}
+
+/* [FIX] إزالة overflow-y: auto و position: absolute لمنع حدوث scroll داخل scroll */
+#hero-layer { 
+    position: relative; 
+    z-index: 5; 
+    width: 100%;
+}
+
+/* Updated Manifesto Container */
+.manifesto-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 160px 40px 100px 40px; 
+    color: #f0e8ff;
+    font-family: "Google Sans Code", monospace;
+    line-height: 1.8;
+    position: relative;
+    z-index: 10;
+    text-align: left;
+}
+
+/* ═══════════════════════════════
+   CIRCLE LOGO — ENTRANCE + FLOAT
+   ═══════════════════════════════ */
+
+/* Entrance: slide in from the left with a clean scale + fade + glow reveal */
+@keyframes logoEntrance {
+    0%   {
+        opacity: 0;
+        transform: translateX(-80px) scale(0.75);
+        filter: blur(8px);
+        box-shadow: 0 0 0px rgba(168,85,247,0);
+    }
+    50%  {
+        opacity: 0.85;
+        transform: translateX(10px) scale(1.04);
+        filter: blur(1px);
+        box-shadow: 0 0 18px rgba(168,85,247,0.4), 0 0 40px rgba(168,85,247,0.12);
+    }
+    75%  {
+        transform: translateX(-4px) scale(0.98);
+        filter: blur(0px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0px) scale(1);
+        filter: blur(0px);
+        box-shadow: 0 0 10px rgba(168,85,247,0.25), 0 0 22px rgba(168,85,247,0.08);
+    }
+}
+
+/* Continuous float: gentle bobbing + slow spin + pulsing glow ring */
+@keyframes logoFloat {
+    0%   { transform: translateY(0px)   rotate(0deg);   box-shadow: 0 0 10px rgba(168,85,247,0.25), 0 0 22px rgba(168,85,247,0.08); }
+    25%  { transform: translateY(-12px) rotate(1.5deg); box-shadow: 0 0 14px rgba(168,85,247,0.35), 0 0 30px rgba(168,85,247,0.12); }
+    50%  { transform: translateY(-6px)  rotate(0deg);   box-shadow: 0 0 12px rgba(255,208,35,0.2), 0 0 24px rgba(168,85,247,0.10); }
+    75%  { transform: translateY(-14px) rotate(-1.5deg);box-shadow: 0 0 14px rgba(168,85,247,0.35), 0 0 30px rgba(168,85,247,0.12); }
+    100% { transform: translateY(0px)   rotate(0deg);   box-shadow: 0 0 10px rgba(168,85,247,0.25), 0 0 22px rgba(168,85,247,0.08); }
+}
+
+/* Rotating glowing border ring */
+@keyframes ringRotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+@keyframes ringPulse {
+    0%, 100% { opacity: 0.5; transform: scale(1)   rotate(0deg); }
+    50%       { opacity: 1.0; transform: scale(1.06) rotate(180deg); }
+}
+
+.manifesto-logo-side {
+    position: absolute;
+    left: -240px;
+    top: 160px;
+    width: 230px;
+    height: 230px;
+    border-radius: 50%;
+    overflow: visible;
+    border: none;
+    /* Entrance first, then float forever */
+    animation: logoEntrance 1.4s cubic-bezier(0.34,1.56,0.64,1) 0.3s both,
+               logoFloat     6s ease-in-out 1.7s infinite;
+}
+
+/* The actual image stays clipped to circle */
+.manifesto-logo-side img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+    position: relative;
+    z-index: 2;
+}
+
+/* Decorative glowing ring via pseudo-element */
+.manifesto-logo-side::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0%,
+        rgba(168,85,247,0.55) 20%,
+        rgba(255,208,35,0.4) 40%,
+        rgba(24,174,242,0.5) 60%,
+        rgba(168,85,247,0.55) 80%,
+        transparent 100%
+    );
+    animation: ringRotate 4s linear infinite;
+    z-index: 1;
+    opacity: 0;
+    animation: logoEntrance 1.4s ease 0.3s both,
+               ringRotate    4s linear 1.7s infinite;
+}
+
+/* Soft outer glow halo */
+.manifesto-logo-side::after {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(168,85,247,0.03) 0%, transparent 65%);
+    animation: ringPulse 3s ease-in-out 1.7s infinite;
+    z-index: 0;
+    pointer-events: none;
+}
+
+
+.manifesto-heading {
+    font-family: "Google Sans Code", monospace; 
+    font-size: clamp(2.2rem, 6vw, 3.5rem);
+    margin-bottom: 40px;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+}
+
+.manifesto-body p {
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.highlight-purple { color: #a855f7; font-weight: 700; }
+.highlight-yellow { color: #ffd023; }
+
+.centered-callout {
+    text-align: center;
+    margin: 60px 0;
+    padding: 40px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.revenue-output {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin-top: 10px;
+}
+
+.unfair-tagline {
+    margin-top: 80px;
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+/* FOOTER STYLES (Keep existing but ensure it flows naturally) */
+#creative-footer {
+    position: relative;
+    width: 100%;
+    background: #000;
+    padding-top: 100px;
+    z-index: 110;
+}
+
+/* [FIX] ميديا كويري لضبط اللوجو في الموبايل */
+@media (max-width: 1200px) {
+    .manifesto-logo-side {
+        position: relative;
+        left: 0;
+        top: 0;
+        margin: 0 auto 30px;
+    }
+    .manifesto-container { text-align: center; }
+}
+
+/* HAMBURGER & BUTTONS (Keeping your original styles) */
+.contact-neural {
+    position: relative;
+    display: inline-block;
+    padding: 10px 25px;
+    color: #fff;
+    text-decoration: none;
+    border: 1px solid #fff;
+    transition: 0.3s;
+}
+.contact-neural:hover { background: #a855f7; border-color: #a855f7; box-shadow: -5px 5px 0px #ffd023; }
+
+/* ═══════════════════════════════
+   CREATIVE AVANT-GARDE FOOTER
+   ═══════════════════════════════ */
+#creative-footer {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    background: linear-gradient(to bottom, transparent, rgba(5,5,5,0.85) 30%, #000000 100%);
+    color: #f0e8ff;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 0;
+    z-index: 110;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    
+    opacity: 0; 
+    filter: blur(30px); 
+    transform: translateY(50px);
+}
+
+.footer-avant-garde {
+    display: flex;
+    flex-wrap: wrap;
+    flex-grow: 1;
+    padding: 10vh 5%;
+    gap: 60px;
+    align-items: center;
+}
+
+.fg-pane { display: flex; flex-direction: column; justify-content: center; }
+
+.fg-left {
+    flex: 1.2;
+    min-width: 300px;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    padding-right: clamp(20px, 4vw, 60px);
+}
+
+.fg-right {
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.cyber-heading {
+    font-size: clamp(2.5rem, 6vw, 5.5rem);
+    font-family: "Oswald", sans-serif;
+    line-height: 1.05;
+    text-transform: uppercase;
+    color: transparent;
+    -webkit-text-stroke: 1.5px #a855f7;
+    margin: 30px 0;
+    letter-spacing: 2px;
+    transition: 0.5s ease-in-out;
+    cursor: default;
+}
+.cyber-heading:hover {
+    color: #ffd023;
+    -webkit-text-stroke: 1.5px #ffd023;
+    transform: scale(1.02) translateX(10px);
+}
+
+.fg-block {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: clamp(20px, 4vw, 40px);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    transition: 0.3s;
+}
+.fg-block:hover { border-color: rgba(168, 85, 247, 0.3); background: rgba(255, 255, 255, 0.04); }
+
+.status-terminal { display: flex; flex-direction: column; gap: 15px; font-family: "Google Sans Code", monospace; }
+.links-block { display: flex; gap: clamp(20px, 4vw, 40px); flex-wrap: wrap; }
+.links-col { flex: 1; display: flex; flex-direction: column; min-width: 120px; }
+
+.footer-logo-box img { width: clamp(100px, 12vw, 150px); filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.4)); }
+.footer-mission { font-size: clamp(0.85rem, 2vw, 1rem); line-height: 1.8; opacity: 0.7; max-width: 400px; font-weight: 300; }
+
+.cell-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: #a855f7;
+    margin-bottom: 25px;
+    font-weight: 700;
+    display: block;
+}
+
+.f-link {
+    text-decoration: none;
+    color: inherit;
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    transition: 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    opacity: 0.6;
+}
+
+.f-link::before {
+    content: '>';
+    margin-right: 12px;
+    color: #ffd023;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: 0.3s;
+}
+
+.f-link:hover { opacity: 1; color: #fff; padding-left: 8px; }
+.f-link:hover::before { opacity: 1; transform: translateX(0); }
+
+.status-row { 
+    display: flex; justify-content: space-between; font-size: 0.85rem; 
+    letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; 
+}
+.status-row:last-child { border-bottom: none; padding-bottom: 0; }
+.status-indicator { color: #00ffaa; text-shadow: 0 0 8px rgba(0,255,170,0.5); font-weight: bold; }
+
+.footer-bar {
+    padding: 30px 5%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    opacity: 0.5;
+    background: #030303;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Animations */
+.line-wrapper { overflow: hidden; display: block; }
+.text-line { display: block; transform: translateY(100%); opacity: 0; filter: blur(10px); will-change: transform, opacity, filter; }
+.typing::after { content: '|'; animation: blink 0.7s infinite; color: #a855f7; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* NEURAL CONTACT BUTTON */
+.contact-wrapper {
+    perspective: 1000px;
+}
+
+.contact-neural {
+    position: relative;
+    display: inline-block;
+    padding: clamp(8px, 1.5vw, 12px) clamp(16px, 3vw, 28px);
+    color: #ffffff;
+    text-decoration: none;
+    font-size: clamp(0.75rem, 1.5vw, 0.9rem);
+    letter-spacing: 0.01em;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease;
+    background: rgba(0, 0, 0, 0.5);
+    overflow: visible;
+}
+
+.contact-neural::before {
+    content: attr(data-value);
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #a855f7;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s cubic-bezier(0.7, 0, 0.3, 1);
+    clip-path: inset(0 100% 0 0);
+    z-index: 2;
+}
+
+.contact-neural:hover { border-color: #a855f7; box-shadow: -5px 5px 0px #ffd023; transform: translate(3px, -3px); }
+.contact-neural:hover::before { clip-path: inset(0 0 0 0); transform: translate(-8px, 8px); }
+
+.neural-line {
+    position: absolute;
+    top: 0; left: 0; width: 2px; height: 100%;
+    background: #fff; box-shadow: 0 0 10px #fff; opacity: 0; z-index: 3;
+}
+.contact-neural:hover .neural-line { animation: scan 1.5s infinite; opacity: 1; }
+@keyframes scan { 0% { left: 0%; } 100% { left: 100%; } }
+
+
+/* ═══════════════════════════════
+   HAMBURGER & MOBILE MENU STYLES
+   ═══════════════════════════════ */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+    z-index: 105; 
+}
+
+.hamburger span {
+    width: 28px; height: 2px;
+    background-color: #f0e8ff;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    display: block;
+    box-shadow: 0 0 5px rgba(168, 85, 247, 0.4);
+}
+
+.hamburger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.hamburger.active span:nth-child(2) { opacity: 0; }
+.hamburger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+/* Mobile Slide Menu */
+.mobile-slide-menu {
+    position: fixed;
+    top: 0; right: -100%; 
+    width: 100%; max-width: 320px;
+    height: 100vh;
+    background: rgba(5, 5, 5, 0.95);
+    backdrop-filter: blur(20px);
+    z-index: 104; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    transition: right 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+    border-left: 1px solid rgba(168, 85, 247, 0.2);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.8);
+}
+
+.mobile-slide-menu.active { right: 0; }
+
+/* Close X Button */
+.close-menu {
+    position: absolute;
+    top: 30px; right: 30px;
+    width: 35px; height: 35px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.close-menu:hover { transform: rotate(180deg) scale(1.1); }
+.close-menu span {
+    position: absolute;
+    width: 26px; height: 2px;
+    background: #f0e8ff;
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.8);
+}
+.close-menu span:first-child { transform: rotate(45deg); }
+.close-menu span:last-child { transform: rotate(-45deg); }
+
+/* Creative Reveal for Menu Items */
+.mobile-slide-menu .menu-item {
+    text-decoration: none;
+    color: #f0e8ff;
+    font-size: 1.3rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    opacity: 0;
+    transform: translateX(60px);
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.mobile-slide-menu.active .menu-item {
+    opacity: 1;
+    transform: translateX(0);
+    transition-delay: calc(0.1s * var(--i));
+}
+
+.mobile-slide-menu a.menu-item:hover { color: #ffd023; transform: scale(1.05) translateX(0); }
+
+/* Container for Contact inside Menu */
+.menu-contact-container {
+    margin-top: 20px;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.mobile-slide-menu.active .menu-contact-container {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: calc(0.1s * var(--i));
+}
+
+.header-contact { display: block; }
+
+/* ═══════════════════════════════
+   MOBILE RESPONSIVE OVERRIDES
+   ═══════════════════════════════ */
+@media (max-width: 1024px) {
+    .fg-left { border-right: none; padding-right: 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 40px; }
+    .footer-avant-garde { flex-direction: column; gap: 40px; padding-top: 5vh; }
+}
+
+@media (max-width: 768px) {
+    .nav-center { display: none; }
+    .hamburger { display: flex; }
+    
+    .header-contact { display: none; } 
+    
+    .main-header { justify-content: space-between; gap: 10px; }
+    .main-header > div:last-child { margin-left: auto; display: flex; align-items: center; gap: 15px; }
+    
+    .text-l, .text-r { margin-left: 0; margin-right: 0; }
+    
+    .agent-text-block { width: 80%; max-width: none; text-align: center; }
+    #n1 { top: 35%; left: 4%; right: 4%; width: auto; }
+    #n2 { top: 42%; left: 4%; right: 4%; width: auto; }
+    #n3 { top: 51%; left: 4%; right: 4%; width: auto; }
+    #n4 { top: 60%; left: 4%; right: 4%; width: auto; }
+    #n5 { top: 70%; left: 4%; right: 4%; width: auto; }
+    #n6 { top: 80%; left: 4%; right: 4%; width: auto; }
+    #n7 { top: 95%; left: 4%; right: 4%; width: auto; display: none;}
+    #n8 { top: 65%; left: 4%; right: 4%; width: auto; display: none; }
+    #n9 { top: 70%; left: 4%; right: 4%; width: auto; display: none; }
+    #n10 { top: 75%; left: 4%; right: 4%; width: auto; display: none; }
+}
+
+@media (max-width: 600px) {
+    .links-block { flex-direction: column; gap: 30px; }
+}
+
+/* ═══════════════════════════════
+   TYPING + SCROLL REVEAL ANIMATIONS
+   ═══════════════════════════════ */
+
+/* ── Typing cursor ── */
+.typing-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.1em;
+    background: #a855f7;
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: cursorBlink 0.7s steps(1) infinite;
+}
+@keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+}
+.type-hidden { opacity: 0; }
+
+/* ── Scroll reveal base state ── */
+.reveal-el {
+    opacity: 0;
+    will-change: opacity, transform, filter;
+}
+
+/* Fade up */
+@keyframes revealFadeUp {
+    from { opacity: 0; transform: translateY(40px); filter: blur(6px); }
+    to   { opacity: 1; transform: translateY(0);    filter: blur(0px); }
+}
+/* Fade left */
+@keyframes revealFadeLeft {
+    from { opacity: 0; transform: translateX(-50px); filter: blur(4px); }
+    to   { opacity: 1; transform: translateX(0);     filter: blur(0px); }
+}
+/* Fade right */
+@keyframes revealFadeRight {
+    from { opacity: 0; transform: translateX(50px); filter: blur(4px); }
+    to   { opacity: 1; transform: translateX(0);    filter: blur(0px); }
+}
+/* Scale pop */
+@keyframes revealPop {
+    0%   { opacity: 0; transform: scale(0.8) translateY(20px); filter: blur(8px); }
+    70%  { opacity: 1; transform: scale(1.03) translateY(-3px); filter: blur(0px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+/* Glitch-slide for the tagline */
+@keyframes revealGlitch {
+    0%   { opacity: 0; transform: translateX(-30px) skewX(8deg); filter: blur(4px); }
+    40%  { opacity: 1; transform: translateX(6px)  skewX(-3deg); filter: blur(0); }
+    60%  { transform: translateX(-3px) skewX(1deg); }
+    100% { opacity: 1; transform: translateX(0) skewX(0deg); }
+}
+/* Word-by-word split reveal for callout */
+@keyframes revealWord {
+    from { opacity: 0; transform: translateY(20px) rotateX(30deg); }
+    to   { opacity: 1; transform: translateY(0)    rotateX(0deg); }
+}
+
+.reveal-fade-up    { animation: revealFadeUp   0.7s cubic-bezier(0.22,1,0.36,1) forwards; }
+.reveal-fade-left  { animation: revealFadeLeft 0.7s cubic-bezier(0.22,1,0.36,1) forwards; }
+.reveal-fade-right { animation: revealFadeRight 0.7s cubic-bezier(0.22,1,0.36,1) forwards; }
+.reveal-pop        { animation: revealPop      0.75s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+.reveal-glitch     { animation: revealGlitch   0.8s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+
+/* AGENT SECTION HEADING - Image Style */
+.agent-selection-title {
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    color: #ffd023;
+    background: linear-gradient(to right, #efca37 20%, #ba40f1 40%, #efca37 20%);
+    background-size: 180% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0;
+    letter-spacing: 0px;
+    word-spacing: -3px;
+    will-change: opacity, transform, filter;
+}
+
+/* The glitch/glow bar behind the text from the image */
+.agent-selection-title::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 110%;
+    height: 15px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 208, 35, 0.15), 
+        rgba(168, 85, 247, 0.2), 
+        transparent);
+    filter: blur(10px);
+    z-index: -1;
+    animation: shimmerBar 3s ease-in-out infinite;
+}
+
+@keyframes shimmerBar {
+    0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scaleX(0.9); }
+    50% { opacity: 0.8; transform: translate(-50%, -50%) scaleX(1.1); }
+}
+
+.text-center{
+    text-align: center;
+}
+
+.mb-0{
+    margin-bottom: 0px  !important;
+}
+
+
+
+        /* ── Hero Section ── */
+        #hero-section {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        /* Sphere canvas — absolute, fills hero section */
+        #canvas-container {
+            position: absolute;
+            top: 0; right: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        #canvas-container canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Title — top left */
+        .content {
+            position: relative;
+            z-index: 10;
+            padding: 110px 5% 0 5%;
+        }
+
+        h1 {
+            font-size: clamp(3rem, 8vw, 5.5rem);
+            font-weight: 500;
+            margin: 0;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            color: #fff;
+        }
+
+        /* Cards row — pinned to bottom */
+        .pillars-wrapper {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            gap: 16px;
+            align-items: stretch;
+            padding: 0 5% 60px 5%;
+            flex-wrap: nowrap;
+        }
+
+        .pillar-card {
+            flex: 1;
+            min-width: 0;
+            border-radius: 22px;
+            padding: 28px 22px;
+            font-size: clamp(0.85rem, 1.3vw, 1rem);
+            line-height: 1.55;
+            text-align: center;
+            color: #fff;
+            opacity: 0;
+            transform: translateY(60px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Card gradient colors matching the reference */
+        .pillar-1 { background: linear-gradient(160deg, #1a0bfc, #3a1aee); }
+        .pillar-2 { background: linear-gradient(160deg, #4e12f5, #6520e0); }
+        .pillar-3 { background: linear-gradient(160deg, #7020dc, #9030c8); }
+        .pillar-4 { background: linear-gradient(160deg, #b030a0, #d04090); }
+
+        @media (max-width: 900px) {
+            .pillars-wrapper { flex-wrap: wrap; }
+            .pillar-card { min-width: calc(50% - 8px); }
+        }
+        @media (max-width: 540px) {
+            .pillars-wrapper { flex-direction: column; }
+            .pillar-card { width: 100%; }
+        }
+
+</style>
+</head>
+
+<body>
+
+<div id="page-loader"><div style="color:#f0e8ff; font-weight:700; letter-spacing:0.2em; font-size:1.5rem;">LOADING...</div></div>
+
+<header class="main-header">
+  <div class="logo"><a href="index.html"><img src="logo1.png" alt="AL-AI.AI" /></a></div>
+
+  <nav class="nav-center">
+    <a href="index.html">About Us</a>
+    <a href="our-manifesto.html">Our Manifesto</a>
+    <a href="resources.html">Resources</a>
+  </nav>
+
+  <div style="display: flex; align-items: center;">
+      <div class="contact-wrapper header-contact">
+        <a href="contact.html" class="contact-neural" data-value="Contact Us">
+          <span class="neural-text">Contact Us</span>
+          <span class="neural-glitch-box"></span>
+          <span class="neural-line"></span>
+        </a>
+      </div>
+
+      <div class="hamburger" id="hamburger">
+          <span></span>
+          <span></span>
+          <span></span>
+      </div>
+  </div>
+</header>
+
+<div class="mobile-slide-menu" id="mobile-menu">
+    <div class="close-menu" id="close-menu">
+        <span></span>
+        <span></span>
+    </div>
+
+    <a href="index.html" class="menu-item" style="--i: 1;">About Us</a>
+    <a href="our-manifesto.html" class="menu-item" style="--i: 2;">Our Manifesto</a>
+    <a href="resources.html" class="menu-item" style="--i: 3;">Resources</a>
+
+    <div class="contact-wrapper menu-contact-container" style="--i: 4;">
+        <a href="contact.html" class="contact-neural" data-value="Contact Us">
+          <span class="neural-text">Contact Us</span>
+          <span class="neural-glitch-box"></span>
+          <span class="neural-line"></span>
+        </a>
+    </div>
+</div>
+
+<div id="scroll-wrapper">
+    <canvas id="canvas"></canvas>
+    <div class="vignette"></div>
+
+    <div id="hero-section">
+        <div id="canvas-container"></div>
+
+        <div class="content">
+            <h1>Core Pillars</h1>
+        </div>
+
+        <div class="pillars-wrapper">
+            <div class="pillar-card pillar-1">
+                Predictive &amp; Prescriptive<br>Iterative &amp; Recursive<br>Agentic Revenue<br>&amp; Output Driven
+            </div>
+            <div class="pillar-card pillar-2">
+                Agentic AI<br>Explainable AI<br>Asynchronous AI<br>Conversational AI<br>Neural-Symbolic AI<br>Agnostic &amp; Hybrid AI<br>Stateful &amp; Situational AI
+            </div>
+            <div class="pillar-card pillar-3">
+                Domain<br>Expert/Specific<br>Functional/Vertical<br>System &amp; Revenue<br>Librarian &amp; Ledger<br>Marketing and<br>engineering<br>Agents
+            </div>
+            <div class="pillar-card pillar-4">
+                Cognitive<br>Contextual Graph<br>Orchestration / Pattern<br>Semantic Ontology<br>Canonical Layer
+            </div>
+        </div>
+    </div>
+
+
+
+    <footer id="creative-footer">
+        <div class="footer-avant-garde">
+            <div class="fg-pane fg-left">
+                <span class="cell-label">01 / Identity</span>
+                <div class="footer-logo-box"><img src="logo1.png" alt="AL-AI.AI" /></div>
+                <h2 class="cyber-heading">DOMINATE<br>THE NOISE</h2>
+                <p class="footer-mission">Looking to the current scene of Ai Domain and agentic Horizons, With the daily hypes (if not hourly) that keep showing, the volume and versions of terms and concepts it have.
+ You will be overwhelmed.</p>
+            </div>
+
+            <div class="fg-pane fg-right">
+                <div class="fg-block status-block">
+                    <span class="cell-label">02 / Engine Status</span>
+                    <div class="status-terminal">
+                        <div class="status-row"><span>CORE LOAD:</span><span class="status-indicator">STABLE</span></div>
+                        <div class="status-row"><span>REASONING:</span><span class="status-indicator">ACTIVE</span></div>
+                        <div class="status-row"><span>LATENCY:</span><span class="status-indicator">0.03ms</span></div>
+                        <div class="status-row"><span>SYSTEM CLOCK:</span><span id="system-clock">00:00:00</span></div>
+                    </div>
+                </div>
+                
+                <div class="fg-block links-block">
+                    <div class="links-col">
+                        <span class="cell-label">03 / Navigation</span>
+                        <a href="#" class="f-link">The Manifesto</a>
+                        <a href="#" class="f-link">Embedded Agents</a>
+                        <a href="#" class="f-link">Adaptive Solutions</a>
+                        <a href="#" class="f-link">Our Research</a>
+                    </div>
+                    <div class="links-col">
+                        <span class="cell-label">04 / Connect</span>
+                        <a href="#" class="f-link">Twitter [X]</a>
+                        <a href="#" class="f-link">LinkedIn</a>
+                        <a href="#" class="f-link">Contact Human</a>
+                        <a href="#" class="f-link">Secure Uplink</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bar">
+            <span>© 2026 AL-AI.AI • ENGINEERED FOR REASONING</span>
+            <span>DATA-DRIVEN DOMINATION</span>
+        </div>
+    </footer>
+
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script>
+/* ═══════════════════════════════
+   CORE VISUALS (Three.js & GSAP)
+   ═══════════════════════════════ */
+let scene, camera, renderer, stars;
+
+/**
+ * Generates a circular texture programmatically 
+ * to replace default square particles.
+ */
+function createCircleTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    ctx.beginPath();
+    ctx.arc(32, 32, 30, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+    return new THREE.CanvasTexture(canvas);
+}
+
+function initThree() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer({ 
+        canvas: document.getElementById('canvas'), 
+        alpha: true,
+        antialias: true 
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    
+    const starGeometry = new THREE.BufferGeometry();
+    const starCount = 3000;
+    const posArray = new Float32Array(starCount * 3);
+    
+    for(let i = 0; i < starCount * 3; i++) {
+        posArray[i] = (Math.random() - 0.5) * 800;
+    }
+    
+    starGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+    // Circular Particle Material
+    const starMaterial = new THREE.PointsMaterial({ 
+        size: 1.5, 
+        color: 0xa855f7,
+        map: createCircleTexture(),
+        transparent: true,
+        alphaTest: 0.5,
+        blending: THREE.AdditiveBlending
+    });
+
+    stars = new THREE.Points(starGeometry, starMaterial);
+    scene.add(stars);
+    camera.position.z = 1;
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    if (stars) {
+        stars.rotation.y += 0.0004;
+        stars.rotation.x += 0.0002;
+    }
+    renderer.render(scene, camera);
+}
+
+/**
+ * Engine Status: Live Clock
+ */
+function startSystemClock() {
+    const clockDisplay = document.getElementById('system-clock');
+    if (clockDisplay) {
+        setInterval(() => {
+            const now = new Date();
+            clockDisplay.innerText = now.toLocaleTimeString('en-GB', { hour12: false });
+        }, 1000);
+    }
+}
+
+/* ═══════════════════════════════
+   LIFECYCLE & SCROLL ANIMATIONS
+   ═══════════════════════════════ */
+window.addEventListener('load', () => {
+    // 1. Initialize 3D Background
+    initThree();
+    animate();
+    
+    // 2. Start UI Utilities
+    startSystemClock();
+
+    // 3. Register GSAP Plugins
+    gsap.registerPlugin(ScrollTrigger);
+
+    // 4. Footer Entrance Animation
+    gsap.to("#creative-footer", {
+        scrollTrigger: { 
+            trigger: "#creative-footer", 
+            start: "top 95%", 
+            toggleActions: "play none none reverse" 
+        },
+        opacity: 1, 
+        filter: "blur(0px)", 
+        y: 0, 
+        duration: 1, 
+        ease: "expo.out"
+    });
+
+    // 5. Staggered Content Loading
+    gsap.fromTo([".fg-left", ".status-block", ".links-block"], 
+        { opacity: 0, y: 50, filter: "blur(15px)" },
+        {
+            scrollTrigger: { 
+                trigger: "#creative-footer", 
+                start: "top 85%",
+                toggleActions: "play none none reverse" 
+            },
+            opacity: 1, 
+            y: 0, 
+            filter: "blur(0px)", 
+            duration: 0.8, 
+            stagger: 0.2, 
+            ease: "power4.out"
+        }
+    );
+
+    // 6. Final UI Reveal
+    document.getElementById('page-loader').classList.add('hidden');
+});
+
+window.addEventListener('resize', () => {
+    if (camera && renderer) {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+});
+</script>
+
+<!-- ═══ TYPING + SCROLL REVEAL ═══ -->
+<script>
+(function () {
+
+    /* ═══════════════════════════════════════
+       1. TYPEWRITER — only "Our Manifesto"
+       ═══════════════════════════════════════ */
+    var CHAR_SPEED  = 12;
+    var PAUSE_AFTER = 300;
+
+    function typeHTML(el, html, done) {
+        el.innerHTML = '';
+        el.classList.remove('type-hidden');
+
+        var tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        var stream = [];
+
+        function walk(node) {
+            if (node.nodeType === 3) {
+                var txt = node.textContent;
+                for (var i = 0; i < txt.length; i++) stream.push({ type: 'char', char: txt[i] });
+            } else if (node.nodeType === 1) {
+                if (node.tagName === 'BR') { stream.push({ type: 'br' }); return; }
+                stream.push({ type: 'open', node: node });
+                node.childNodes.forEach(walk);
+                stream.push({ type: 'close' });
+            }
+        }
+        tmp.childNodes.forEach(walk);
+
+        var idx = 0, stack = [el];
+        var cursor = document.createElement('span');
+        cursor.className = 'typing-cursor';
+
+        function step() {
+            if (idx >= stream.length) {
+                if (cursor.parentNode) cursor.parentNode.removeChild(cursor);
+                if (done) setTimeout(done, PAUSE_AFTER);
+                return;
+            }
+            var item = stream[idx++];
+            var parent = stack[stack.length - 1];
+
+            if (item.type === 'char' || item.type === 'br') {
+                if (cursor.parentNode) cursor.parentNode.removeChild(cursor);
+                if (item.type === 'br') parent.appendChild(document.createElement('br'));
+                else parent.appendChild(document.createTextNode(item.char));
+                parent.appendChild(cursor);
+                setTimeout(step, CHAR_SPEED);
+            } else if (item.type === 'open') {
+                var clone = document.createElement(item.node.tagName);
+                Array.from(item.node.attributes).forEach(function(a){ clone.setAttribute(a.name, a.value); });
+                parent.appendChild(clone);
+                stack.push(clone);
+                step();
+            } else if (item.type === 'close') {
+                stack.pop(); step();
+            }
+        }
+        el.appendChild(cursor);
+        setTimeout(step, 0);
+    }
+
+    var heading = document.querySelector('.manifesto-heading');
+    if (heading) {
+        var origHeading = heading.innerHTML;
+        heading.innerHTML = '';
+        heading.classList.add('type-hidden');
+
+        var headObs = new IntersectionObserver(function(entries) {
+            if (entries[0].isIntersecting) {
+                headObs.disconnect();
+                typeHTML(heading, origHeading, null);
+            }
+        }, { threshold: 0.3 });
+        headObs.observe(heading);
+    }
+
+    /* ═══════════════════════════════════════
+       2. SCROLL REVEAL — all other elements
+       ═══════════════════════════════════════ */
+
+    // Map each selector to its animation class + delay multiplier
+    var revealConfig = [
+        { sel: '.manifesto-body p:nth-child(1)',  anim: 'reveal-fade-left',  delay: 0   },
+        { sel: '.manifesto-body p:nth-child(2)',  anim: 'reveal-fade-right', delay: 0   },
+        { sel: '.manifesto-body p:nth-child(3)',  anim: 'reveal-fade-left',  delay: 0   },
+        { sel: '.centered-callout h3',            anim: 'reveal-fade-up',    delay: 0   },
+        { sel: '.revenue-output',                 anim: 'reveal-pop',        delay: 0.1 },
+        { sel: '.manifesto-body p:nth-child(5)',  anim: 'reveal-fade-up',    delay: 0   },
+        { sel: '.manifesto-body p:nth-child(6)',  anim: 'reveal-fade-right', delay: 0   },
+        { sel: '.unfair-tagline',                 anim: 'reveal-glitch',     delay: 0   },
+    ];
+
+    revealConfig.forEach(function(cfg) {
+        var els = document.querySelectorAll(cfg.sel);
+        els.forEach(function(el, i) {
+            el.classList.add('reveal-el');
+            var obs = new IntersectionObserver(function(entries) {
+                if (entries[0].isIntersecting) {
+                    obs.disconnect();
+                    var d = (cfg.delay + i * 0.08);
+                    el.style.animationDelay = d + 's';
+                    el.classList.add(cfg.anim);
+                }
+            }, { threshold: 0.15 });
+            obs.observe(el);
+        });
+    });
+
+})();
+</script>
+
+<!-- ═══ MOBILE MENU LOGIC ═══ -->
+<script>
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobile-menu');
+const closeMenuBtn = document.getElementById('close-menu');
+const mobileLinks = mobileMenu.querySelectorAll('a');
+
+if (hamburger && mobileMenu && closeMenuBtn) {
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.add('active');
+        mobileMenu.classList.add('active');
+    });
+
+    const closeMenu = () => {
+        hamburger.classList.remove('active');
+        mobileMenu.classList.remove('active');
+    };
+
+    closeMenuBtn.addEventListener('click', closeMenu);
+    mobileLinks.forEach(link => link.addEventListener('click', closeMenu));
+}
+</script>
+
+<!-- ═══ SCROLL GRADIENT ═══ -->
+<script>
+(function () {
+    // Gradient stops at scroll = 0 (top)
+    var topGrad    = 'linear-gradient(to bottom, #06010e 0%, #0d0225 25%, #180540 55%, #2a0a5e 80%, #3b0f7a 100%)';
+
+    // Gradient stops at scroll = max (bottom) — deep dark purple
+    var bottomGrad = 'linear-gradient(to bottom, #0d0225 0%, #1a0540 20%, #2d0960 50%, #3e0d80 75%, #12051b 100%)';
+
+    // Interpolate between two hex colours
+    function lerpHex(a, b, t) {
+        var ar = parseInt(a.slice(1,3),16), ag = parseInt(a.slice(3,5),16), ab = parseInt(a.slice(5,7),16);
+        var br = parseInt(b.slice(1,3),16), bg = parseInt(b.slice(3,5),16), bb = parseInt(b.slice(5,7),16);
+        var r = Math.round(ar + (br-ar)*t).toString(16).padStart(2,'0');
+        var g = Math.round(ag + (bg-ag)*t).toString(16).padStart(2,'0');
+        var bl= Math.round(ab + (bb-ab)*t).toString(16).padStart(2,'0');
+        return '#'+r+g+bl;
+    }
+
+    // Colour pairs [top-grad-stop, bottom-grad-stop] at scroll=0 vs scroll=max
+    var stops = [
+        { start: '#06010e', end: '#0a0315' },
+        { start: '#0d0225', end: '#0f041a' },
+        { start: '#180540', end: '#11051c' },
+        { start: '#2a0a5e', end: '#12051b' },
+        { start: '#3b0f7a', end: '#12051b' }
+    ];
+
+    var percents = ['0%', '25%', '55%', '80%', '100%'];
+
+    var ticking = false;
+
+    function updateGradient() {
+        var scrollMax = document.body.scrollHeight - window.innerHeight;
+        var t = scrollMax > 0 ? Math.min(window.scrollY / scrollMax, 1) : 0;
+        // ease in-out
+        t = t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2;
+
+        var colorStops = stops.map(function(s, i) {
+            return lerpHex(s.start, s.end, t) + ' ' + percents[i];
+        }).join(', ');
+
+        document.body.style.background = 'linear-gradient(to bottom, ' + colorStops + ')';
+        ticking = false;
+    }
+
+    window.addEventListener('scroll', function () {
+        if (!ticking) {
+            requestAnimationFrame(updateGradient);
+            ticking = true;
+        }
+    }, { passive: true });
+
+    // Set initial
+    updateGradient();
+})();
+</script>
+
+
+ <script>
+    /* ═══════════════════════════════════════════════════
+       THREE.JS BLOB v2 — matches reference exactly:
+       electric blue upper-right, deep purple left,
+       hot pink/coral rim top-left + warm salmon bottom
+       ═══════════════════════════════════════════════════ */
+    (function() {
+        const container = document.getElementById('canvas-container');
+        if (!container) return;
+        const hero = document.getElementById('hero-section');
+        function getSize() {
+            return { w: hero ? hero.offsetWidth : window.innerWidth,
+                     h: hero ? hero.offsetHeight : window.innerHeight };
+        }
+        let { w, h } = getSize();
+
+        const scene  = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 200);
+        camera.position.z = 22;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(w, h);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        /* ── High-res sphere for smooth blob distortion ── */
+        const geo = new THREE.SphereGeometry(5.4, 256, 256);
+
+        const mat = new THREE.ShaderMaterial({
+            uniforms: {
+                uTime: { value: 0.0 },
+            },
+            vertexShader: `
+                uniform float uTime;
+                varying vec3 vPos;
+                varying vec3 vNorm;
+                varying float vNoise;
+                varying float vRimDist; // view-space rim distance — correct for any rotation
+
+                /* Simplex 3D noise */
+                vec3 mod289v3(vec3 x){return x-floor(x*(1./289.))*289.;}
+                vec4 mod289v4(vec4 x){return x-floor(x*(1./289.))*289.;}
+                vec4 permute(vec4 x){return mod289v4(((x*34.)+1.)*x);}
+                vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-.85373472095314*r;}
+                float snoise(vec3 v){
+                    const vec2 C=vec2(1./6.,1./3.);
+                    const vec4 D=vec4(0.,.5,1.,2.);
+                    vec3 i=floor(v+dot(v,C.yyy));
+                    vec3 x0=v-i+dot(i,C.xxx);
+                    vec3 g=step(x0.yzx,x0.xyz);
+                    vec3 l=1.-g;
+                    vec3 i1=min(g.xyz,l.zxy);
+                    vec3 i2=max(g.xyz,l.zxy);
+                    vec3 x1=x0-i1+C.xxx;
+                    vec3 x2=x0-i2+C.yyy;
+                    vec3 x3=x0-D.yyy;
+                    i=mod289v3(i);
+                    vec4 p=permute(permute(permute(
+                        i.z+vec4(0.,i1.z,i2.z,1.))
+                        +i.y+vec4(0.,i1.y,i2.y,1.))
+                        +i.x+vec4(0.,i1.x,i2.x,1.));
+                    float n_=.142857142857;
+                    vec3 ns=n_*D.wyz-D.xzx;
+                    vec4 j=p-49.*floor(p*ns.z*ns.z);
+                    vec4 x_=floor(j*ns.z);
+                    vec4 y_=floor(j-7.*x_);
+                    vec4 x=x_*ns.x+ns.yyyy;
+                    vec4 y=y_*ns.x+ns.yyyy;
+                    vec4 h=1.-abs(x)-abs(y);
+                    vec4 b0=vec4(x.xy,y.xy);
+                    vec4 b1=vec4(x.zw,y.zw);
+                    vec4 s0=floor(b0)*2.+1.;
+                    vec4 s1=floor(b1)*2.+1.;
+                    vec4 sh=-step(h,vec4(0.));
+                    vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy;
+                    vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
+                    vec3 p0=vec3(a0.xy,h.x);
+                    vec3 p1=vec3(a0.zw,h.y);
+                    vec3 p2=vec3(a1.xy,h.z);
+                    vec3 p3=vec3(a1.zw,h.w);
+                    vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
+                    p0*=norm.x;p1*=norm.y;p2*=norm.z;p3*=norm.w;
+                    vec4 m=max(.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.);
+                    m=m*m;
+                    return 42.*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
+                }
+
+                void main(){
+                    vNorm = normal;
+                    vPos  = position;
+
+                    // View-space normal: z=1 at center facing camera, z=0 at silhouette rim
+                    vec3 viewNormal = normalize(normalMatrix * normal);
+                    // rimDist in VIEW space — always correct regardless of world rotation
+                    vRimDist = 1.0 - abs(viewNormal.z);
+
+                    float t = uTime * 0.22;
+                    // 3-octave noise — only applied away from the silhouette (rimMask)
+                    float n  = snoise(normal * 1.2 + vec3(t*0.8,  t*0.55, t*0.4))  * 0.38;
+                          n += snoise(normal * 2.6 + vec3(t*0.45, t*1.0,  t*0.65)) * 0.14;
+                          n += snoise(normal * 5.0 + vec3(t*1.2,  t*0.35, t*0.9))  * 0.05;
+                    vNoise = n;
+
+                    // Fully suppress displacement at the silhouette → clean edge
+                    float rimMask = 1.0 - smoothstep(0.55, 0.92, vRimDist);
+                    // Flatten bottom-left for organic asymmetry
+                    float flatten = smoothstep(0.0, -1.0, normal.x + normal.y) * 0.18 * rimMask;
+                    vec3 displaced = position + normal * (n * rimMask - flatten);
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform float uTime;
+                varying vec3  vPos;
+                varying vec3  vNorm;
+                varying float vNoise;
+                varying float vRimDist;
+
+                void main(){
+                    // ── Colour palette ──
+                    vec3 electricBlue = vec3(0.04, 0.10, 0.98);
+                    vec3 deepPurple   = vec3(0.28, 0.02, 0.55);
+                    vec3 hotPink      = vec3(0.95, 0.08, 0.55);
+                    vec3 salmonCoral  = vec3(0.98, 0.38, 0.32);
+                    vec3 midViolet    = vec3(0.48, 0.04, 0.72);
+
+                    vec3  n  = normalize(vNorm);
+                    float nx = n.x;
+                    float ny = n.y;
+
+                    // Use object-space normal for colour gradients (looks good)
+                    float rimDist = length(n.xy);
+
+                    // 1. Blue/purple base
+                    float blueMask = smoothstep(-0.5, 0.6, nx + ny * 0.3);
+                    vec3 col = mix(deepPurple, electricBlue, blueMask);
+
+                    // 2. Violet ring
+                    float violetBand = smoothstep(0.0, 0.5, rimDist) * smoothstep(0.95, 0.5, rimDist);
+                    col = mix(col, midViolet, violetBand * 0.6);
+
+                    // 3. Pink rim top-left
+                    float pinkRim = smoothstep(0.55, 0.88, rimDist);
+                    float topLeftBias = smoothstep(0.2, -0.6, nx) * smoothstep(-0.1, 0.6, ny);
+                    col = mix(col, hotPink, pinkRim * (0.55 + topLeftBias * 0.45));
+
+                    // 4. Coral bottom glow
+                    float bottomGlow = smoothstep(0.1, -0.75, ny) * smoothstep(0.6, -0.1, abs(nx));
+                    col = mix(col, salmonCoral, bottomGlow * 0.70);
+
+                    // 5. Shimmer
+                    float shimmer = sin(uTime * 0.18 + vPos.x * 0.12 + vPos.y * 0.09) * 0.5 + 0.5;
+                    col += vec3(0.0, 0.0, shimmer * 0.06);
+                    col += vNoise * vec3(0.02, 0.01, 0.06);
+                    col  = clamp(col, 0.0, 1.0);
+
+                    // ── Alpha: use VIEW-space rimDist for perfectly clean silhouette ──
+                    float edgeFade = 1.0 - smoothstep(0.78, 1.0, vRimDist);
+                    gl_FragColor = vec4(col, clamp(edgeFade, 0.0, 1.0));
+                }
+            `,
+            transparent: true,
+            depthWrite: false,
+            side: THREE.FrontSide,
+        });
+
+        const blob = new THREE.Mesh(geo, mat);
+        // Start near upper-right
+        blob.position.set(3.5, 2.0, -1.0);
+        scene.add(blob);
+
+        // Bouncing velocity (world units per frame)
+        const vel = { x: 0.004, y: 0.003 };
+
+        const clock = new THREE.Clock();
+        function animate(){
+            requestAnimationFrame(animate);
+            const t = clock.getElapsedTime();
+            mat.uniforms.uTime.value = t;
+
+            // Bouncing ball — moves freely across the whole section area
+            // Bounds based on camera FOV at blob's z depth
+            const halfH = Math.tan((42 / 2) * Math.PI / 180) * (camera.position.z - blob.position.z);
+            const halfW = halfH * (w / h);
+            const blobR = 5.4; // approximate visual radius in world units
+
+            const xMin = -halfW + blobR * 0.6;
+            const xMax =  halfW - blobR * 0.6;
+            const yMin = -halfH + blobR * 0.6;
+            const yMax =  halfH - blobR * 0.6;
+
+            blob.position.x += vel.x;
+            blob.position.y += vel.y;
+
+            if (blob.position.x > xMax) { blob.position.x = xMax; vel.x *= -1; }
+            if (blob.position.x < xMin) { blob.position.x = xMin; vel.x *= -1; }
+            if (blob.position.y > yMax) { blob.position.y = yMax; vel.y *= -1; }
+            if (blob.position.y < yMin) { blob.position.y = yMin; vel.y *= -1; }
+
+            // No rotation
+            blob.rotation.set(0, 0, 0);
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            const { w: nw, h: nh } = getSize();
+            w = nw; h = nh;
+            camera.aspect = nw / nh;
+            camera.updateProjectionMatrix();
+            renderer.setSize(nw, nh);
+        });
+
+        /* GSAP — pillar cards entrance on load */
+        window.addEventListener('load', function(){
+            gsap.to(".pillar-card", {
+                opacity: 1, y: 0,
+                duration: 0.9, stagger: 0.15,
+                delay: 0.4, ease: "power4.out"
+            });
+        });
+    })();
+    </script>
+
+</body>
+</html>
