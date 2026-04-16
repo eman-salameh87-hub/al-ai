@@ -629,8 +629,9 @@ html { overscroll-behavior: none; }
         grid-column: 1 / -1;
     }
 
-    /* Show all items on mobile */
-    #n7, #n8, #n9, #n10 { display: block; }
+    /* Show n9/n10 on mobile, hide n7/n8 */
+    #n9, #n10 { display: block; }
+    #n7, #n8 { display: none !important; }
 
     #manifesto-overlay {
         background-size: cover !important;
