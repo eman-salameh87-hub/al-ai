@@ -1,0 +1,3051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>al-ai.ai | Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Oswald:wght@200..700&display=swap&font-display=swap" rel="stylesheet"/>
+<!-- Preload critical scripts so the browser fetches them early -->
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" as="script" crossorigin/>
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" as="script" crossorigin/>
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js" as="script" crossorigin/>
+<!-- Preload key images used above the fold -->
+<link rel="preload" href="logo1.png" as="image"/>
+<link rel="preload" href="agent.png" as="image"/>
+<style>
+/* ═══════════════════════════════
+   CORE STYLES
+   ═══════════════════════════════ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { width: 100%; background: #000000; font-family: "Google Sans Code", monospace; overflow-x: hidden; overscroll-behavior: none; }
+html { overscroll-behavior: none; }
+
+/* ── Mobile viewport height fix (iOS Safari URL bar) ── */
+#viewport-container { height: 100vh; height: 100dvh; }
+
+#page-loader { position: fixed; inset: 0; z-index: 9999; background: #000000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.9s ease; }
+#page-loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+/* RESPONSIVE HEADER */
+.main-header { position: fixed; top: 0; left: 0; width: 100%; height: 80px; display: flex; align-items: center; justify-content: space-between; padding: 0 5%; z-index: 103; background: rgba(0, 0, 0, 0.3); border-bottom: 1px solid rgba(225, 225, 225, 0.2); }
+
+.logo img { width: clamp(90px, 12vw, 120px); filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.4)); } 
+.nav-center { display: flex; gap: clamp(15px, 3vw, 40px); position: absolute; left: 50%; transform: translateX(-50%); }
+.nav-center a { text-decoration: none; color: #fff; font-size: clamp(0.75rem, 1.5vw, 0.9rem); transition: 0.3s; cursor: pointer; letter-spacing: 0.01em; white-space: nowrap; }
+
+/* COSMIC SHADOW LINES */
+#cosmic-shadow-line, #cosmic-shadow-line2 {
+    position: absolute;
+    width: 100vw;
+    filter: blur(40px); 
+    opacity: 0.8;
+    z-index: 1;
+    pointer-events: none;
+    user-select: none;
+    will-change: transform, opacity;
+}
+#cosmic-shadow-line { top: -15%; left: -5%; height: 10vh; background: radial-gradient(ellipse at center, rgba(4, 1, 49, 0.6) 0%, rgba(57, 33, 186, 0.6) 50%, transparent 80%); transform: rotate(-35deg); }
+#cosmic-shadow-line2 { top: 18%; left: -5%; height: 5vh; background: linear-gradient(90deg, transparent 0%, rgba(57, 33, 186, 0.6) 50%, transparent 100%); transform: rotate(-35deg); }
+
+/* SCROLL WRAPPER */
+#scroll-wrapper { position: relative; width: 100%; }
+#viewport-container { position: sticky; top: 0; width: 100%; height: 100vh; overflow: hidden; z-index: 1; }
+.scroll-height { height: 720vh; } 
+
+#canvas { position: absolute; inset: 0; }
+.vignette { position: absolute; inset: 0; pointer-events: none; z-index: 2; /* background: radial-gradient(ellipse 65% 65% at 50% 50%, transparent 5%, rgba(0,0,0,0.65) 100%); */ }
+
+/* HOLE DESCENT */
+#descent-vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0;
+    /*background: radial-gradient(ellipse 45% 45% at 50% 50%, transparent 0%, rgba(0,0,0,0.0) 40%, rgba(0,0,0,0.97) 100%);*/
+    transition: none;
+    will-change: opacity;
+}
+
+#light-shaft {
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 30vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 4;
+    opacity: 0;
+    background: linear-gradient(to bottom, rgba(255,230,180,0.04) 0%, rgba(255,200,120,0.08) 30%, transparent 80%);
+    filter: blur(20px);
+    mix-blend-mode: screen;
+    will-change: opacity;
+}
+
+.orb-label { position: fixed; z-index: 999; pointer-events: all; cursor: pointer; display: flex; flex-direction: column; align-items: center; text-align: center; transform: translate(-50%, -50%); width: max-content; max-width: min(340px, 44vw); }
+.orb-label-tag { font-family: 'Google Sans Code'; font-size: clamp(1.2rem, 3vw, 2.2rem); font-weight: 700; color: #f0e8ff; line-height: 1.15; }
+.orb-label-sub { font-size: clamp(0.7rem, 1.5vw, 0.82rem); color: #f0e8ff; margin-top: 15px; line-height: 1.5; word-spacing: -2px; white-space: normal; }
+
+/* Label hover feedback */
+.orb-label:hover {
+    transform: translate(-50%, -50%) scale(1.06);
+    filter: drop-shadow(0 0 18px rgba(168, 85, 247, 0.45)) drop-shadow(0 0 12px rgba(255, 208, 35, 0.18));
+}
+.orb-label:hover .orb-label-tag {
+    color: #ffd023;
+    text-shadow: 0 0 26px rgba(168, 85, 247, 0.25);
+}
+.orb-label:hover .orb-label-sub {
+    color: rgba(255, 240, 190, 0.92);
+}
+
+#hero-layer { position: absolute; inset: 0; z-index: 5; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; text-align: center; padding: 0 5%; }
+.hero-title { font-weight: 600; font-size: clamp(1.6rem, 5vw, 2.6rem); color: #f0e8ff; line-height: 1.2; letter-spacing: -2px; word-spacing: -3px; }
+
+/* MANIFESTO OVERLAY */
+#manifesto-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    background-image: url('wall.png');
+    background-size: contain;
+    background-position: center center;
+    background-repeat: repeat;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    overflow: hidden;
+}
+#wall-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    mix-blend-mode: screen;
+}
+#manifesto-overlay.wall-active {
+    opacity: 1;
+}
+.manifesto-section { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 5vw; text-align: center; opacity: 0; visibility: hidden; pointer-events: none; }
+
+/* RESPONSIVE TYPOGRAPHY */
+.service-title { font-size: clamp(1.2rem, 4vw, 1.8rem); color: #f0e8ff; font-weight: 500; letter-spacing: -1px; margin-bottom: 15px; }
+.service-desc { font-size: clamp(0.9rem, 2.5vw, 1.15rem); color: #f0e8ff; font-weight: 500; letter-spacing: -1px; }
+
+.text-white{ color: #fff; } 
+.text-red{ color: #f41712; }
+.text-yellow { color: #ffd023; }
+.text-deep-orange { color: #ff6900; }
+.text-light-orange { color: #ff7b2e; }
+
+.text-l{ margin-left: 150px; line-height: 35px !important; }
+.text-r{ margin-right: 150px; line-height: 35px !important; }
+
+.text-big{ font-size: clamp(1.2rem, 4vw, 1.5rem); line-height: 1.4; }
+.text-mid{ font-size: clamp(0.9rem, 3.5vw, 1.1rem); line-height: 35px; }
+.text-small{ font-size: clamp(0.85rem, 2.5vw, 0.9rem); font-weight: 400; line-height: 1.6 !important; }
+
+/* AGENT SECTION */
+.main-agent-section {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 15;
+}
+
+.bg-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; top: 0%; margin-top: 80px;}
+
+.agent-text-block {
+    position: absolute;
+    width: max-content;
+    max-width: 420px;
+    color: #f0e8ff;
+    font-size: clamp(0.75rem, 1.5vw, 0.82rem);
+    line-height: 1.5;
+    opacity: 0; 
+    pointer-events: auto;
+    cursor: pointer;
+    transition: color 0.3s, transform 0.3s;
+    user-select: none;
+    text-align: center;
+}
+
+.agent-text-block:hover { color: #ffd023; transform: scale(1.05); }
+
+/* ── Large screen (≥1300px): scattered absolute layout ── */
+/* Horizontal zones never overlap:
+   Left  items: left 5%, max-width 420px  →  ~65–485px
+   Center items: left 50% -50%, max-width 320px → ~center ±160px
+   Right items: right 5%, max-width 420px →  ~815–1235px  */
+#agent-texts-wrapper { position: absolute; inset: 0; pointer-events: none; }
+#n1 { top: 44%; left: 5%; }
+#n2 { top: 44%; right: 5%; }
+#n3 { top: 56%; left: 5%; }
+#n4 { top: 56%; right: 5%; }
+#n5 { top: 69%; left: 5%; }
+#n6 { top: 69%; right: 5%; }
+#n7 { top: 81%; left: 5%; }
+#n8 { top: 81%; right: 5%; }
+#n9 { top: 54%; left: 50%; transform: translateX(-54%); text-align: center; max-width: 320px; }
+#n10 { top: 75%; left: 50%; right: auto; transform: translateX(-50%); text-align: center; max-width: 320px; }
+
+/* ── Medium screens (769px–1299px): 2-column grid ── */
+@media (min-width: 769px) and (max-width: 1299px) {
+    /* Title: pull up so grid has space below */
+    .agent-selection-title {
+        top: 10% !important;
+        white-space: normal !important;
+        width: 80%;
+        text-align: center;
+    }
+
+    /* Section: allow children to overflow */
+    #new-agent-section { overflow: visible; }
+
+    /* Wrapper: absolute grid filling the space below the title */
+    #agent-texts-wrapper {
+        position: absolute;
+        top: 22%;
+        bottom: 4%;
+        left: 4%;
+        right: 4%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: repeat(5, 1fr);
+        gap: 10px 36px;
+        pointer-events: all;
+        align-items: center;
+       
+    }
+
+    /* All items: flow inside the grid */
+    #n1, #n2, #n3, #n4, #n5, #n6, #n7, #n8, #n9, #n10 {
+        position: relative;
+        top: auto; left: auto; right: auto; bottom: auto;
+        transform: none;
+        width: auto;
+        max-width: 100%;
+        font-size: clamp(0.68rem, 1.3vw, 0.78rem);
+    }
+
+    /* Explicit grid placement so center items sit between grouped pairs */
+    #n1  { grid-row: 1; grid-column: 1; }
+    #n2  { grid-row: 1; grid-column: 2; }
+    #n3  { grid-row: 2; grid-column: 1; }
+    #n4  { grid-row: 2; grid-column: 2; }
+    #n9  { grid-row: 3; grid-column: 1 / -1; text-align: center; transform: none; }
+    #n5  { grid-row: 4; grid-column: 1; }
+    #n6  { grid-row: 4; grid-column: 2; }
+    #n10 { grid-row: 5; grid-column: 1 / -1; text-align: center; transform: none; }
+    /* n7 and n8 go into implicit row 6 */
+    #n7  { grid-row: 6; grid-column: 1; }
+    #n8  { grid-row: 6; grid-column: 2; }
+
+    /* Show items hidden on mobile */
+    #n7, #n8{ display: none !important; }
+}
+
+/* ═══════════════════════════════
+   CREATIVE AVANT-GARDE FOOTER
+   ═══════════════════════════════ */
+#creative-footer {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    background: linear-gradient(to bottom, transparent, rgba(5,5,5,0.85) 30%, #000000 100%);
+    color: #f0e8ff;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 0;
+    z-index: 110;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    
+    opacity: 0; 
+    filter: blur(30px); 
+    transform: translateY(50px);
+}
+
+.footer-avant-garde {
+    display: flex;
+    flex-wrap: wrap;
+    flex-grow: 1;
+    padding: 10vh 5%;
+    gap: 60px;
+    align-items: center;
+}
+
+.fg-pane { display: flex; flex-direction: column; justify-content: center; }
+
+.fg-left {
+    flex: 1.2;
+    min-width: 300px;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    padding-right: clamp(20px, 4vw, 60px);
+}
+
+.fg-right {
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.cyber-heading {
+    font-size: clamp(2.5rem, 6vw, 5.5rem);
+    font-family: "Oswald", sans-serif;
+    line-height: 1.05;
+    text-transform: uppercase;
+    color: transparent;
+    -webkit-text-stroke: 1.5px #a855f7;
+    margin: 30px 0;
+    letter-spacing: 2px;
+    transition: 0.5s ease-in-out;
+    cursor: default;
+}
+.cyber-heading:hover {
+    color: #ffd023;
+    -webkit-text-stroke: 1.5px #ffd023;
+    transform: scale(1.02) translateX(10px);
+}
+
+.fg-block {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: clamp(20px, 4vw, 40px);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    transition: 0.3s;
+}
+.fg-block:hover { border-color: rgba(168, 85, 247, 0.3); background: rgba(255, 255, 255, 0.04); }
+
+.status-terminal { display: flex; flex-direction: column; gap: 15px; font-family: "Google Sans Code", monospace; }
+.links-block { display: flex; gap: clamp(20px, 4vw, 40px); flex-wrap: wrap; }
+.links-col { flex: 1; display: flex; flex-direction: column; min-width: 120px; }
+
+.footer-logo-box img { width: clamp(100px, 12vw, 150px); filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.4)); }
+.footer-mission { font-size: clamp(0.65rem, 2vw, .8rem); line-height: 1.5; opacity: 0.7; max-width: 400px; font-weight: 300; }
+
+.cell-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: #a855f7;
+    margin-bottom: 25px;
+    font-weight: 700;
+    display: block;
+}
+
+.f-link {
+    text-decoration: none;
+    color: inherit;
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    transition: 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    opacity: 0.6;
+}
+
+.f-link::before {
+    content: '>';
+    margin-right: 12px;
+    color: #ffd023;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: 0.3s;
+}
+
+.f-link:hover { opacity: 1; color: #fff; padding-left: 8px; }
+.f-link:hover::before { opacity: 1; transform: translateX(0); }
+
+.status-row { 
+    display: flex; justify-content: space-between; font-size: 0.85rem; 
+    letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; 
+}
+.status-row:last-child { border-bottom: none; padding-bottom: 0; }
+.status-indicator { color: #00ffaa; text-shadow: 0 0 8px rgba(0,255,170,0.5); font-weight: bold; }
+
+.footer-bar {
+    padding: 30px 5%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    opacity: 0.5;
+    background: #030303;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Animations */
+.line-wrapper { overflow: hidden; display: block; }
+.text-line { display: block; transform: translateY(100%); opacity: 0; filter: blur(10px); will-change: transform, opacity, filter; }
+.typing::after { content: '|'; animation: blink 0.7s infinite; color: #a855f7; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* NEURAL CONTACT BUTTON */
+.contact-wrapper {
+    perspective: 1000px;
+}
+
+.contact-neural {
+    position: relative;
+    display: inline-block;
+    padding: clamp(8px, 1.5vw, 12px) clamp(16px, 3vw, 28px);
+    color: #ffffff;
+    text-decoration: none;
+    font-size: clamp(0.75rem, 1.5vw, 0.9rem);
+    letter-spacing: 0.01em;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease;
+    background: rgba(0, 0, 0, 0.5);
+    overflow: visible;
+}
+
+.contact-neural::before {
+    content: attr(data-value);
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #a855f7;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s cubic-bezier(0.7, 0, 0.3, 1);
+    clip-path: inset(0 100% 0 0);
+    z-index: 2;
+}
+
+.contact-neural:hover { border-color: #a855f7; box-shadow: -5px 5px 0px #ffd023; transform: translate(3px, -3px); }
+.contact-neural:hover::before { clip-path: inset(0 0 0 0); transform: translate(-8px, 8px); }
+
+.neural-line {
+    position: absolute;
+    top: 0; left: 0; width: 2px; height: 100%;
+    background: #fff; box-shadow: 0 0 10px #fff; opacity: 0; z-index: 3;
+}
+.contact-neural:hover .neural-line { animation: scan 1.5s infinite; opacity: 1; }
+@keyframes scan { 0% { left: 0%; } 100% { left: 100%; } }
+
+
+/* ═══════════════════════════════
+   HAMBURGER & MOBILE MENU STYLES
+   ═══════════════════════════════ */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+    z-index: 105; 
+}
+
+.hamburger span {
+    width: 28px; height: 2px;
+    background-color: #f0e8ff;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    display: block;
+    box-shadow: 0 0 5px rgba(168, 85, 247, 0.4);
+}
+
+.hamburger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.hamburger.active span:nth-child(2) { opacity: 0; }
+.hamburger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+/* Mobile Slide Menu */
+.mobile-slide-menu {
+    position: fixed;
+    top: 0; right: -100%; 
+    width: 100%; max-width: 320px;
+    height: 100vh;
+    background: rgba(5, 5, 5, 0.95);
+    backdrop-filter: blur(20px);
+    z-index: 104; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    transition: right 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+    border-left: 1px solid rgba(168, 85, 247, 0.2);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.8);
+}
+
+.mobile-slide-menu.active { right: 0; }
+
+/* Close X Button */
+.close-menu {
+    position: absolute;
+    top: 30px; right: 30px;
+    width: 35px; height: 35px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.close-menu:hover { transform: rotate(180deg) scale(1.1); }
+.close-menu span {
+    position: absolute;
+    width: 26px; height: 2px;
+    background: #f0e8ff;
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.8);
+}
+.close-menu span:first-child { transform: rotate(45deg); }
+.close-menu span:last-child { transform: rotate(-45deg); }
+
+/* Creative Reveal for Menu Items */
+.mobile-slide-menu .menu-item {
+    text-decoration: none;
+    color: #f0e8ff;
+    font-size: 1.3rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    opacity: 0;
+    transform: translateX(60px);
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.mobile-slide-menu.active .menu-item {
+    opacity: 1;
+    transform: translateX(0);
+    transition-delay: calc(0.1s * var(--i));
+}
+
+.mobile-slide-menu a.menu-item:hover { color: #ffd023; transform: scale(1.05) translateX(0); }
+
+/* Container for Contact inside Menu */
+.menu-contact-container {
+    margin-top: 20px;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.mobile-slide-menu.active .menu-contact-container {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: calc(0.1s * var(--i));
+}
+
+.header-contact { display: block; }
+
+/* ═══════════════════════════════
+   MOBILE RESPONSIVE OVERRIDES
+   ═══════════════════════════════ */
+@media (max-width: 1024px) {
+    .fg-left { border-right: none; padding-right: 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 40px; }
+    .footer-avant-garde { flex-direction: column; gap: 40px; padding-top: 5vh; }
+}
+
+@media (max-width: 768px) {
+    .nav-center { display: none; }
+    .hamburger { display: flex; }
+    
+    .header-contact { display: none; } 
+    
+    .main-header { justify-content: space-between; gap: 10px; }
+    .main-header > div:last-child { margin-left: auto; display: flex; align-items: center; gap: 15px; }
+    
+    .text-l, .text-r { margin-left: 0; margin-right: 0; }
+
+    /* ── Orb label sub-text: larger & readable on mobile ── */
+    .orb-label-sub { font-size: clamp(0.65rem, 2.8vw, 0.78rem); }
+    .orb-label-tag  { font-size: clamp(1rem, 5.5vw, 1.5rem); }
+
+    /* ── Agent section: full-height scrollable column, no absolute overlap ── */
+    #new-agent-section {
+        overflow-y: visible;
+        overflow-x: hidden;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding-top: 100px;   /* clear header */
+        padding-bottom: 40px;
+    }
+
+    /* Title: static flow, centered */
+    .agent-selection-title {
+        position: absolute !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+        width: 90% !important;
+        margin: 0 auto 24px auto;
+        text-align: center;
+        white-space: normal !important;
+        font-size: clamp(1rem, 4.5vw, 1.3rem) !important;
+        word-spacing: normal;
+        opacity: 1;          /* parent section controls visibility */
+    }
+
+    /* Wrapper: 2-column grid, full width */
+    #agent-texts-wrapper {
+        position: relative;
+        inset: auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 7px;
+        width: 100%;
+        padding: 0 12px;
+        box-sizing: border-box;
+        margin: 0;
+        pointer-events: all;
+         margin-top: 40px;
+    }
+
+    /* All blocks: grid-flow, auto height, no overlap */
+    .agent-text-block {
+        position: relative !important;
+        top: auto !important; left: auto !important;
+        right: auto !important; bottom: auto !important;
+        transform: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        text-align: center;
+        font-size: clamp(0.7rem, 3vw, 0.82rem);
+        line-height: 1.5;
+        padding: 10px 10px;
+        border-left: 2px solid rgba(168,85,247,0.35);
+        background: rgba(0,0,0,0.25);
+        border-radius: 4px;
+    }
+
+    /* n9 and n10 span both columns so they stay centered */
+    #n9, #n10 {
+        grid-column: 1 / -1;
+    }
+
+    /* Show n9/n10 on mobile, hide n7/n8 */
+    #n9, #n10 { display: block; }
+    #n7, #n8 { display: none !important; }
+
+    #manifesto-overlay {
+        background-size: cover !important;
+        background-repeat: no-repeat !important;
+    }
+
+    /* On mobile the overlay is driven by JS, not scroll scrub */
+    #manifesto-overlay.mobile-manifesto-live {
+        opacity: 1 !important;
+    }
+
+    /* Mobile manifesto: sections stack for auto-play, not scroll-scrub */
+    .manifesto-section.mobile-manifesto-active {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    /* Mobile creative entrance keyframes */
+    @keyframes m-slide-up {
+        0%   { transform: translateY(60px); opacity: 0; filter: blur(12px); }
+        100% { transform: translateY(0);    opacity: 1; filter: blur(0px); }
+    }
+    @keyframes m-slide-left {
+        0%   { transform: translateX(80px); opacity: 0; filter: blur(10px); }
+        100% { transform: translateX(0);    opacity: 1; filter: blur(0px); }
+    }
+    @keyframes m-slide-right {
+        0%   { transform: translateX(-80px); opacity: 0; filter: blur(10px); }
+        100% { transform: translateX(0);     opacity: 1; filter: blur(0px); }
+    }
+    @keyframes m-scale-in {
+        0%   { transform: scale(0.75); opacity: 0; filter: blur(14px); }
+        70%  { transform: scale(1.04); }
+        100% { transform: scale(1);    opacity: 1; filter: blur(0px); }
+    }
+    @keyframes m-glitch-in {
+        0%   { transform: skewX(12deg) translateX(-30px); opacity: 0; filter: blur(8px); }
+        40%  { transform: skewX(-4deg) translateX(8px); opacity: 0.7; }
+        70%  { transform: skewX(2deg) translateX(-3px); opacity: 0.9; }
+        100% { transform: skewX(0) translateX(0); opacity: 1; filter: blur(0px); }
+    }
+    @keyframes m-flip-in {
+        0%   { transform: rotateX(55deg) translateY(40px); opacity: 0; filter: blur(10px); }
+        100% { transform: rotateX(0deg) translateY(0); opacity: 1; filter: blur(0px); }
+    }
+
+    .mobile-manifesto-active .service-title,
+    .mobile-manifesto-active .service-desc {
+        /* reset GSAP inline overrides for mobile */
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+    }
+
+    /* Per-section entrance animation applied via JS */
+    .mobile-manifesto-active.m-anim-slide-up   { animation: m-slide-up   0.7s cubic-bezier(.22,1,.36,1) both; }
+    .mobile-manifesto-active.m-anim-slide-left  { animation: m-slide-left  0.65s cubic-bezier(.22,1,.36,1) both; }
+    .mobile-manifesto-active.m-anim-slide-right { animation: m-slide-right 0.65s cubic-bezier(.22,1,.36,1) both; }
+    .mobile-manifesto-active.m-anim-scale-in    { animation: m-scale-in   0.75s cubic-bezier(.22,1,.36,1) both; }
+    .mobile-manifesto-active.m-anim-glitch-in   { animation: m-glitch-in  0.7s ease both; }
+    .mobile-manifesto-active.m-anim-flip-in     { animation: m-flip-in    0.75s cubic-bezier(.22,1,.36,1) both; perspective: 800px; }
+
+    /* Text lines inside: stagger-reveal on mobile (no scroll) */
+    .mobile-manifesto-active .text-line {
+        animation: m-slide-up 0.6s cubic-bezier(.22,1,.36,1) both;
+    }
+    .mobile-manifesto-active .line-wrapper:nth-child(1) .text-line { animation-delay: 0.1s; }
+    .mobile-manifesto-active .line-wrapper:nth-child(2) .text-line { animation-delay: 0.22s; }
+    .mobile-manifesto-active .line-wrapper:nth-child(3) .text-line { animation-delay: 0.34s; }
+    .mobile-manifesto-active .line-wrapper:nth-child(4) .text-line { animation-delay: 0.46s; }
+    .mobile-manifesto-active .line-wrapper:nth-child(5) .text-line { animation-delay: 0.58s; }
+    .mobile-manifesto-active .line-wrapper:nth-child(6) .text-line { animation-delay: 0.70s; }
+
+    /* Exit animation */
+    @keyframes m-exit-up {
+        0%   { transform: translateY(0);    opacity: 1; filter: blur(0px); }
+        100% { transform: translateY(-55px); opacity: 0; filter: blur(12px); }
+    }
+    .mobile-manifesto-exit { animation: m-exit-up 0.45s cubic-bezier(.55,0,1,.45) both !important; }
+
+}
+
+@media (max-width: 600px) {
+    .links-block { flex-direction: column; gap: 30px; }
+}
+
+/* SERVICES DIVE OVERLAY (click on Services orb) */
+#services-dive-overlay{
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 50% 35%,
+            rgba(168,85,247,0.18) 0%,
+            rgba(0,0,0,0.65) 45%,
+            rgba(0,0,0,0.92) 70%,
+            #000 100%);
+    backdrop-filter: blur(10px);
+    transition: opacity 0.25s ease;
+}
+#services-dive-overlay::after{
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1px, transparent 1px, transparent 3px);
+    opacity: 0.0;
+    mix-blend-mode: screen;
+    pointer-events: none;
+}
+body.services-dive-active #services-dive-overlay{
+    opacity: 1;
+    pointer-events: auto;
+}
+body.services-dive-active #services-dive-overlay::after{
+    opacity: 0.35;
+}
+
+body.services-dive-active .orb-label{
+    opacity: 0 !important;
+    filter: blur(10px);
+    pointer-events: none;
+}
+
+body.services-dive-active #hero-layer {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 0.3s ease !important;
+}
+
+#canvas{ will-change: filter; }
+
+/* ═══════════════════════════════
+   NEW SERVICES SCROLL CONTAINER
+   ═══════════════════════════════ */
+#services-scroll-container {
+    position: fixed;
+    inset: 0;
+    z-index: 10005;
+    overflow-y: scroll;
+    scrollbar-width: none;
+    opacity: 0;
+    pointer-events: none; /* Crucial: This must be none when inactive */
+    transition: opacity 0.5s ease;
+}
+
+body.services-dive-active #services-scroll-container {
+    opacity: 1;
+    pointer-events: auto; /* Only active during the dive */
+}
+#services-scroll-container::-webkit-scrollbar {
+    display: none;
+}
+body.services-dive-active #services-scroll-container {
+    opacity: 1;
+    pointer-events: auto;
+}
+.service-item {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 1000px;
+    padding: 0 5%;
+}
+.service-content {
+    max-width: 800px;
+    text-align: center;
+    padding: 30px;
+    will-change: transform, opacity, filter;
+    /* We removed the hardcoded opacity, transform, and blur so GSAP can handle the children dynamically */
+}
+.service-num {
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    color: #a855f7;
+    letter-spacing: 6px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+.service-name {
+    font-size: clamp(2rem, 5vw, 4rem);
+    color: #fff;
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    margin-bottom: 25px;
+    line-height: 1.1;
+    text-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+}
+.service-details {
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    color: #f0e8ff;
+    margin-bottom: 45px;
+    line-height: 1.6;
+    opacity: 0.8;
+}
+
+@keyframes pulse-ring {
+    0% { transform: scale(0.8); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: scale(1.8); opacity: 0; }
+}
+
+.intro-reveal-wrapper {
+    overflow: hidden; /* This creates the 'invisible line' for the reveal */
+    padding: 10px 0;
+}
+
+.reveal-text-main {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(3rem, 10vw, 8rem);
+    color: #fff;
+    letter-spacing: 5spx;
+    margin: 0;
+    line-height: 1;
+    transform: translateY(110%); /* Start hidden below the wrapper */
+    text-shadow: 0 0 30px rgba(168, 85, 247, 0.5);
+    text-transform: inherit;
+     font-weight: 500;
+}
+
+.reveal-text-sub {
+    font-size: clamp(0.8rem, 2vw, 1.2rem);
+    color: #ffd023;
+    letter-spacing: 8px;
+    margin: 0;
+    transform: translateY(110%);
+    opacity: 0;
+    letter-spacing: 0px;
+    max-width: 600px;
+    line-height: 28px;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+    40% {transform: translateY(-10px);}
+    60% {transform: translateY(-5px);}
+}
+
+/* AGENT SECTION HEADING - Image Style */
+.agent-selection-title {
+    position: absolute; 
+    top: 40%; /* Positioned at the top center */
+    left: 45%;
+    transform: translateX(-45%) translateY(16px);
+    font-size: clamp(1.1rem, 2.9vw, 1.7rem);
+    color: #ffd023;
+    background: linear-gradient(to right, #ffd023 0%, #ff80ff 50%, #4e47b5 80%);
+    background-size: 180% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    z-index: 20;
+    opacity: 0;
+    white-space: nowrap;
+    letter-spacing: -1px;
+    word-spacing: -4px;
+    will-change: opacity, transform, filter;
+}
+
+/* The glitch/glow bar behind the text from the image */
+.agent-selection-title::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 110%;
+    height: 15px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 208, 35, 0.15), 
+        rgba(168, 85, 247, 0.2), 
+        transparent);
+    filter: blur(10px);
+    z-index: -1;
+    animation: shimmerBar 3s ease-in-out infinite;
+}
+
+@keyframes shimmerBar {
+    0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scaleX(0.9); }
+    50% { opacity: 0.8; transform: translate(-50%, -50%) scaleX(1.1); }
+}
+
+/* Agent section font handled by Google Fonts link in <head> */
+
+/* Applied on "Novel Embedded Agent" click to suppress hero text during scrub catch-up.
+   !important beats GSAP inline styles so the scrub cannot flash the hero text
+   while it spends 2s catching up to the target scroll position. */
+#hero-layer.force-hidden {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: none !important;
+}
+
+/* Hides manifesto overlay + sections while orb-click scroll is in flight,
+   preventing the scrub from flashing them during the animated jump */
+#manifesto-overlay.orb-transition-hide,
+#manifesto-overlay.orb-transition-hide .manifesto-section,
+#manifesto-overlay.orb-transition-hide .text-line {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: none !important;
+}
+
+
+/* ── SOUND TOGGLE BUTTON ── */
+#sound-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s, border-color 0.3s, transform 0.2s;
+    flex-shrink: 0;
+    margin-right: 14px;
+    margin-left: 14px;
+}
+#sound-toggle:hover {
+    background: rgba(168,85,247,0.18);
+    border-color: #a855f7;
+    transform: scale(1.1);
+}
+#sound-toggle svg { display: block; }
+#sound-toggle .icon-muted { display: none; }
+#sound-toggle.muted .icon-playing { display: none; }
+#sound-toggle.muted .icon-muted   { display: block; }
+
+/* ripple pulse when playing */
+@keyframes sound-ripple {
+    0%   { box-shadow: 0 0 0 0 rgba(168,85,247,0.45); }
+    70%  { box-shadow: 0 0 0 8px rgba(168,85,247,0); }
+    100% { box-shadow: 0 0 0 0 rgba(168,85,247,0); }
+}
+#sound-toggle:not(.muted) { animation: sound-ripple 2s ease-out infinite; }
+
+@media (max-width: 768px) {
+    .service-desc{
+        line-height: 28px !important;
+    }
+
+    .text-white, .text-red, .text-yellow, .text-deep-orange, .text-light-orange, .text-l, .text-r, .text-big, .text-mid, .text-small{
+        line-height: 28px !important;
+    }
+
+}
+
+
+</style>
+
+
+</head>
+
+<body>
+
+<!-- preload="none" prevents audio from blocking window.load; it loads on first user interaction -->
+<audio id="bg-audio" loop preload="none">
+    <source src="sound.mp3" type="audio/mpeg">
+</audio>
+
+<div id="page-loader"><div style="color:#f0e8ff; font-weight:700; letter-spacing:0.2em; font-size:1.5rem;">LOADING...</div></div>
+
+<header class="main-header">
+  <div class="logo"><a href="index.html"><img src="logo1.png" alt="AL-AI.AI" fetchpriority="high" /></a></div>
+  
+  <nav class="nav-center">
+    <a href="about.html">About Us</a>
+    <a href="our-manifesto.html">Our Manifesto</a>
+    <a href="resources.html">Resources</a>
+  </nav>
+  
+  <div style="display: flex; align-items: center;">
+      <button id="sound-toggle" aria-label="Toggle sound">
+        <!-- Playing icon: speaker with waves -->
+        <svg class="icon-playing" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f0e8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+        </svg>
+        <!-- Muted icon: speaker with X -->
+        <svg class="icon-muted" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f0e8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <line x1="23" y1="9" x2="17" y2="15"/>
+          <line x1="17" y1="9" x2="23" y2="15"/>
+        </svg>
+      </button>
+
+      <div class="contact-wrapper header-contact">
+        <a href="contact.html" class="contact-neural" data-value="Contact Us">
+          <span class="neural-text">Contact Us</span>
+          <span class="neural-glitch-box"></span>
+          <span class="neural-line"></span>
+        </a>
+      </div>
+      <div class="hamburger" id="hamburger">
+          <span></span>
+          <span></span>
+          <span></span>
+      </div>
+  </div>
+</header>
+
+<div class="mobile-slide-menu" id="mobile-menu">
+    <div class="close-menu" id="close-menu">
+        <span></span>
+        <span></span>
+    </div>
+    
+    <a href="about.html" class="menu-item" style="--i: 1;">About Us</a>
+    <a href="our-manifesto.html" class="menu-item" style="--i: 2;">Our Manifesto</a>
+    <a href="resources.html" class="menu-item" style="--i: 3;">Resources</a>
+    
+    <div class="contact-wrapper menu-contact-container" style="--i: 4;">
+        <a href="contact.html" class="contact-neural" data-value="Contact Us">
+          <span class="neural-text">Contact Us</span>
+          <span class="neural-glitch-box"></span>
+          <span class="neural-line"></span>
+        </a>
+    </div>
+</div>
+
+<div id="scroll-wrapper">
+    <div id="viewport-container">
+        
+        <canvas id="canvas"></canvas>
+        <div id="cosmic-shadow-line"></div>
+        <div id="cosmic-shadow-line2"></div>
+        <div class="vignette"></div>
+        <div id="descent-vignette"></div>
+        <div id="light-shaft"></div>
+        <div id="services-dive-overlay" aria-hidden="true"></div>
+
+        <div id="services-scroll-container">
+            <div style="height: 100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center;">
+                <div class="intro-reveal-wrapper">
+                    <h2 id="services-intro-title" class="reveal-text-main">Our Services</h2>
+                </div>
+                <div class="intro-reveal-wrapper" style="margin-top: 20px;">
+                    <p id="services-intro-desc" class="reveal-text-sub">We combine digital marketing, data science,
+and machine learning to drive results through intelligent analysis and automation.</p>
+                </div>
+            </div>
+            
+            <div class="service-item">
+                <div class="service-content">
+                    <div class="service-num">Our Services</div>
+                    <h2 class="service-name">Data-Driven & AI Solution</h2>
+                    <p class="service-details">We focus our efforts on the crucial pre-processing stage to ensure data is clean, normalized, and optimized for AI applications. This methodical approach ensures high-quality data feeds into our custom AI systems, leading to more accurate predictions and superior outcomes.</p>
+                    <div class="contact-wrapper"><a href="#" class="contact-neural" data-value="View More"><span class="neural-text">View More</span><span class="neural-line"></span></a></div>
+                </div>
+            </div>
+
+            <div class="service-item">
+                <div class="service-content">
+                    <div class="service-num">Our Services</div>
+                    <h2 class="service-name">Agentic AI & Agent Systems</h2>
+                    <p class="service-details">Autonomous AI agents that work independently and collaboratively to achieve business goals.Rather than offering single-purpose AI tools, the company builds an integrated, multi-agent ecosystem designed for seamless Goal-driven automation, cross-functional collaboration.</p>
+                    <div class="contact-wrapper"><a href="#" class="contact-neural" data-value="View More"><span class="neural-text">View More</span><span class="neural-line"></span></a></div>
+                </div>
+            </div>
+
+            <div class="service-item">
+                <div class="service-content">
+                    <div class="service-num">Our Services</div>
+                    <h2 class="service-name">Conversational & Edge Analytics</h2>
+                    <p class="service-details">Our conversational and edge analytics solutions enable seamless human-machine interaction, faster decision-making, and intelligent automation across every customer touchpoint. By combining natural language understanding with real-time data processing, we deliver immediate, actionable insights.</p>
+                    <div class="contact-wrapper"><a href="#" class="contact-neural" data-value="View More"><span class="neural-text">View More</span><span class="neural-line"></span></a></div>
+                </div>
+            </div>
+
+            <div class="service-item">
+                <div class="service-content">
+                    <div class="service-num">04 / Our Services</div>
+                    <h2 class="service-name">Automated Decision-Making</h2>
+                    <p class="service-details">Business Process Automation leveraging Multi-Decision Pattern (MDP) frameworks and BPMN implementation for streamlined operations.</p>
+                    <div class="contact-wrapper"><a href="#" class="contact-neural" data-value="View More"><span class="neural-text">View More</span><span class="neural-line"></span></a></div>
+                </div>
+            </div>
+
+            <div class="service-item">
+                <div class="service-content">
+                    <div class="service-num">05 / Our Services</div>
+                    <h2 class="service-name">Polarization & Indoctrination Analysis</h2>
+                    <p class="service-details">Understanding how organizations and markets split into distinct perspectives enables better strategic positioning and market segmentation.</p>
+                    <div class="contact-wrapper"><a href="#" class="contact-neural" data-value="View More"><span class="neural-text">View More</span><span class="neural-line"></span></a></div>
+                </div>
+            </div>
+
+            <div id="services-return-trigger" style="height: 35vh; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:20px;">
+                <div style="position:relative; width: 60px; height: 60px; display:flex; align-items:center; justify-content:center;">
+                    <div style="position:absolute; width:100%; height:100%; border:2px solid #a855f7; border-radius:50%; animation: pulse-ring 1.5s infinite ease-out;"></div>
+                    <div style="width:10px; height:10px; background:#ffd023; border-radius:50%;"></div>
+                </div>
+                <span style="color:#ffd023; font-size: 0.9rem; letter-spacing: 4px; text-transform:uppercase;">Re-establishing Core Link...</span>
+            </div>
+        </div>
+
+        
+
+        <div id="hero-layer">
+            <h1 class="hero-title" id="type-title">Are you Here for a <u>Reason</u> or <u>Reasoning</u>?</h1>
+            <p class="hero-sub" id="type-sub" style="font-size: clamp(1rem, 4vw, 1.5rem); color:#ffd023;">Are you here to <u>Compete</u> or <u>Dominate</u>?</p>
+        </div>
+
+        <div id="orb-label-0" class="orb-label"><span class="orb-label-tag">Novel<br>Embedded<br>Agent</span><span class="orb-label-sub">Revenue is my only language</span></div>
+        <div id="orb-label-1" class="orb-label"><span class="orb-label-tag">Services</span><span class="orb-label-sub">
+            Still looking for the standard list?<br />
+            We understand. Here you can find<br />
+            the list of what to put on the invoice.
+        </span></div>
+
+        <div id="manifesto-overlay">
+            <canvas id="wall-canvas"></canvas>
+            <div class="manifesto-section" id="m1">
+                <h2 class="service-title">Call Us what you want, Crazy, Bold, Arrogant. <br> Disagree with many ideas and concepts</h2>
+                <p class="service-desc">
+                    <span class="text-big text-red">But there is one Fact we can't ignore:</span><br>
+                    <span class="text-big text-white">If it is efficient and getting the desired results, Then Why Not?</span><br>
+                    <span class="text-small text-red">For those who are waiting for the ethical statement: <strong>Really!!</strong></span>
+                </p>
+            </div>
+            <div class="manifesto-section" id="m2">
+                <h2 class="service-title"><span class="text-yellow text-mid">"If it's Generative, it's already obsolete.</span></h2>
+                <p class="service-desc"><span class="text-yellow text-mid">We build Adaptive Intelligence Solutions, not making you fit one.</span></p>
+            </div>
+            <div class="manifesto-section" id="m3">
+                <h2 class="service-title"><span class="text-white text-mid">No one knows the possible, but what matters is what is applicable</span></h2>
+                <p class="service-desc"><span class="text-white text-mid">It should not be a Mystery</span></p>
+            </div>
+            <div class="manifesto-section" id="m4">
+                <h2 class="service-title"><span class="text-deep-orange text-mid">"You Don't look for revenue, You want 'Feeling'?</span></h2>
+                <p class="service-desc">
+                    <span class="text-deep-white text-small">Go hire a poet, you're still in 2021.</span><br>
+                    <span class="text-deep-white text-small">We engineer the invisible layer between your messy data and your </span><br> 
+                    <span class="text-deep-white text-small">bank account, your Prospect Customer as they also Know this fact.</span></p>
+            </div>
+            <div class="manifesto-section" id="m5">
+                <h2 class="service-title"><span class="text-light-orange text-mid">The Consistent threat and mandatory shifte</span></h2>
+                <p class="service-desc">
+                    <span class="text-deep-white text-small">You Spent years working in a domain and now it is shifting.</span><br>
+                    <span class="text-deep-white text-small">Unlucky you, we spent the last 18 years, and our domain became more powerful.</span></p>
+            </div>
+            <div class="manifesto-section" id="m6">
+                <h2 class="service-title"><span class="text-big text-yellow"> The Chaos and Rot in an Overwhelming AI world</span></h2>
+                <p class="service-desc">
+                    <span class="text-white text-mid text-r">There is No common name of anything</span><br>
+                    <span class="text-white text-mid text-l">There is No common Concept of anything</span><br>
+                    <span class="text-white text-mid text-r">There is No common Reference of anything</span><br>
+                    <span class="text-white text-mid text-l">There is No common Framework of anything</span><br>
+                    <span class="text-white text-mid text-r">There is No common Standards of anything</span><br>
+                    <span class="text-white text-mid">Even if they exist, the translator keep changing</span>
+                </p>
+            </div>
+        </div>
+
+        <div id="new-agent-section" class="main-agent-section">
+            <h2 id="agent-selection-title" class="agent-selection-title">Select your pain or targeted gain</h2>
+            <video id="agent-video" autoplay loop muted playsinline preload="metadata" class="bg-video">
+                <source src="Media1.mp4" type="video/mp4">
+            </video>
+            <div id="agent-texts-wrapper">
+                <div class="agent-text-block" id="n1" data-text="You need to know whose not buying from you?"></div>
+                <div class="agent-text-block" id="n2" data-text="How effecient the huge likes and clicks you are getting?"></div>
+                <div class="agent-text-block" id="n3" data-text="If i gave you 3 different customer profiles you know whose your right customer and whose not?"></div>
+                <div class="agent-text-block" id="n4" data-text="If I could cut your acquisition cost by 20% but you had to fire your favorite agency, would you do it?"></div>
+                <div class="agent-text-block" id="n9" data-text="If I could rewrite your homepage in 3 seconds to double conversion, would you let me? Or do you prefer the human touch?"></div>
+                <div class="agent-text-block" id="n5" data-text="I can code a solution for your revenue problem in real-time right now. No devs needed. Just tell me the goal."></div>
+                <div class="agent-text-block" id="n6" data-text="You are here because something is broken. Is it the traffic, the conversion, or the product? Be honest, I'm not a human."></div>
+                <div class="agent-text-block" id="n10" data-text="Are you looking for 'Marketing' or are you looking for 'Domination'? The strategy is different."></div>
+                <div class="agent-text-block" id="n7" data-text="Let's play a game. You tell me your revenue goal, and I'll generate the roadmap to hit it. No charge for the map."></div>
+                <div class="agent-text-block" id="n8" data-text="Challenge the Intelligence. If we can't solve your problem in 3 minutes, we pay you."></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="scroll-height"></div>
+
+    <footer id="creative-footer">
+        <div class="footer-avant-garde">
+            <div class="fg-pane fg-left">
+                <span class="cell-label">01 / Identity</span>
+                <div class="footer-logo-box"><img src="logo1.png" alt="AL-AI.AI" loading="lazy" /></div>
+                <h2 class="cyber-heading">DOMINATE<br>THE NOISE</h2>
+                <p class="footer-mission">Looking to the current scene of Ai Domain and agentic Horizons, With the daily hypes (if not hourly) that keep showing, the volume and versions of terms and concepts it have.
+ You will be overwhelmed.</p>
+            </div>
+
+            <div class="fg-pane fg-right">
+                <div class="fg-block status-block">
+                    <span class="cell-label">02 / Engine Status</span>
+                    <div class="status-terminal">
+                        <div class="status-row"><span>CORE LOAD:</span><span class="status-indicator">STABLE</span></div>
+                        <div class="status-row"><span>REASONING:</span><span class="status-indicator">ACTIVE</span></div>
+                        <div class="status-row"><span>LATENCY:</span><span class="status-indicator">0.03ms</span></div>
+                        <div class="status-row"><span>SYSTEM CLOCK:</span><span id="system-clock">00:00:00</span></div>
+                    </div>
+                </div>
+                
+                <div class="fg-block links-block">
+                    <div class="links-col">
+                        <span class="cell-label">03 / Navigation</span>
+                        <a href="#" class="f-link">The Manifesto</a>
+                        <a href="#" class="f-link">Embedded Agents</a>
+                        <a href="#" class="f-link">Adaptive Solutions</a>
+                        <a href="#" class="f-link">Our Research</a>
+                    </div>
+                    <div class="links-col">
+                        <span class="cell-label">04 / Connect</span>
+                        <a href="#" class="f-link">Twitter [X]</a>
+                        <a href="#" class="f-link">LinkedIn</a>
+                        <a href="#" class="f-link">Contact Human</a>
+                        <a href="#" class="f-link">Secure Uplink</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bar">
+            <span>© 2026 AL-AI.AI • ENGINEERED FOR REASONING</span>
+            <span>DATA-DRIVEN DOMINATION</span>
+        </div>
+    </footer>
+
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+<!-- Dismiss loader as soon as scripts are ready — don't wait for audio/video/images -->
+<script>
+(function() {
+    function dismissLoader() {
+        var loader = document.getElementById('page-loader');
+        if (loader) loader.classList.add('hidden');
+    }
+    // Scripts are already loaded at this point (we're after them), so dismiss on next tick
+    // to allow the browser to paint the initial frame first
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() { setTimeout(dismissLoader, 50); });
+    } else {
+        setTimeout(dismissLoader, 50);
+    }
+})();
+</script>
+
+
+<script>
+if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }
+window.scrollTo(0, 0);
+document.documentElement.scrollTop = 0;
+document.body.scrollTop = 0;
+</script>
+
+<script>
+// FOOTER CLOCK SCRIPT
+function updateClock() {
+    const now = new Date();
+    const timeStr = now.getHours().toString().padStart(2, '0') + ":" + 
+                    now.getMinutes().toString().padStart(2, '0') + ":" + 
+                    now.getSeconds().toString().padStart(2, '0');
+    document.getElementById('system-clock').innerText = timeStr;
+}
+setInterval(updateClock, 1000); updateClock();
+
+const canvas = document.getElementById('canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(62, window.innerWidth/window.innerHeight, 0.1, 200);
+camera.position.z = 9;
+
+const Light1 = new THREE.PointLight(0x3c3c3c, 8); Light1.position.set(0, 10, 5); scene.add(Light1);
+const Light2 = new THREE.PointLight(0x4c4c4c, 3); Light2.position.set(8, -5, 10); scene.add(Light2);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.15); scene.add(ambientLight);
+
+const orbs = [], floatData = [];
+const mouse = new THREE.Vector2(0, 0);
+const motionParams = { spread: 1.0, visibility: 1.0 }; 
+
+function createCircleTexture() {
+    const size = 64; const c = document.createElement('canvas'); c.width = size; c.height = size;
+    const ctx = c.getContext('2d'); const g = ctx.createRadialGradient(size/2,size/2,0,size/2,size/2,size/2);
+    g.addColorStop(0,'white'); g.addColorStop(0.2,'rgba(255,255,255,0.4)'); g.addColorStop(0.5,'rgba(255,255,255,0.1)'); g.addColorStop(1,'transparent');
+    ctx.fillStyle = g; ctx.fillRect(0,0,size,size); return new THREE.CanvasTexture(c);
+}
+const particleTex = createCircleTexture();
+
+function createSolidCircleTexture() {
+    const size = 64; const c = document.createElement('canvas'); c.width = size; c.height = size;
+    const ctx = c.getContext('2d');
+    ctx.beginPath(); ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
+    ctx.fillStyle = 'white'; ctx.fill();
+    return new THREE.CanvasTexture(c);
+}
+const solidCircleTex = createSolidCircleTexture();
+
+function createSolidBackTexture() {
+    const size = 512; 
+    const c = document.createElement('canvas'); 
+    c.width = size; c.height = size;
+    const ctx = c.getContext('2d'); 
+    
+    const centerX = size * 0.5; 
+    const centerY = size * 0.5;
+    const radius = size * 0.45; 
+
+    const g = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+    
+    g.addColorStop(0, '#0a0030');
+    g.addColorStop(0.35, '#150050');
+    g.addColorStop(0.65, '#0d1a60');
+    g.addColorStop(0.85, '#4b1e7e');
+    g.addColorStop(1, '#000000');  
+
+    ctx.clearRect(0, 0, size, size);
+    ctx.beginPath(); 
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.fillStyle = g; 
+    ctx.fill(); 
+    
+    return new THREE.CanvasTexture(c);
+}
+const solidBackTex = createSolidBackTexture();
+
+const globalColors = ['#2110c1', '#e7a352', '#9e847d', '#89145c', '#0f147b', '#be2ac8', '#272998', '#9a764b'];
+
+function createParticleOrb(id, parentPos, noiseConfig) {
+    const group = new THREE.Group(); group.userData.visibility = 1.0;
+
+    const isMobile = window.innerWidth <= 768;
+    const totalParticles = Math.floor((isMobile ? 13000 : 40000) * (noiseConfig.particleMult !== undefined ? noiseConfig.particleMult : 1.0));
+    
+    const glowMat = new THREE.SpriteMaterial({
+        map: solidBackTex, 
+        color: 0xffffff,
+        transparent: true,
+        blending: THREE.NormalBlending, 
+        depthWrite: false,
+        opacity: 1.0
+    });
+
+    const perLayer = Math.floor(totalParticles / (globalColors.length + 4));
+
+    const glowSprite = new THREE.Sprite(glowMat);
+    const glowScale = (noiseConfig.baseRadius + 0.12) * 2.2; 
+    glowSprite.scale.set(glowScale, glowScale, 1);
+    glowSprite.userData.isGlowSprite = true;
+    glowSprite.userData.baseGlowScale = glowScale;
+    glowSprite.renderOrder = 1; 
+    group.add(glowSprite);
+
+    globalColors.forEach((hex, index) => {
+        const geo = new THREE.BufferGeometry(); const posArr = new Float32Array(perLayer * 3); const colArr = new Float32Array(perLayer * 3);
+        const baseColor = new THREE.Color(hex);
+        for(let i=0; i<perLayer; i++) {
+            const theta = Math.random()*Math.PI*2; const phi = Math.acos((Math.random()*2)-1);
+            const noise = Math.sin(theta * noiseConfig.freqX + index) * Math.cos(phi * noiseConfig.freqY + index) * noiseConfig.amp;
+            const radius = noiseConfig.baseRadius + noise + (Math.random()*0.1);
+            posArr[i*3] = radius*Math.sin(phi)*Math.cos(theta); posArr[i*3+1] = radius*Math.sin(phi)*Math.sin(theta); posArr[i*3+2] = radius*Math.cos(phi);
+            colArr[i*3] = baseColor.r; colArr[i*3+1] = baseColor.g; colArr[i*3+2] = baseColor.b;
+        }
+        geo.setAttribute('position', new THREE.BufferAttribute(posArr, 3)); geo.setAttribute('color', new THREE.BufferAttribute(colArr, 3));
+        const mat = new THREE.PointsMaterial({ size: noiseConfig.pSize * 1.2, vertexColors: true, transparent: true, opacity: 0.9, map: particleTex, blending: THREE.AdditiveBlending, depthWrite: false });
+        const points = new THREE.Points(geo, mat); 
+        points.renderOrder = 2; 
+        group.add(points);
+    });
+
+    // const streamColors = ['#717874', '#717874', '#1f117d', '#8d1c7e']; 
+    // streamColors.forEach((hex, zi) => {
+    //     const streamGeo = new THREE.BufferGeometry(); const count = 1500; const streamPos = new Float32Array(count * 1);
+    //     const randomSeeds = new Float32Array(count); 
+
+    //     for(let i=0; i<count; i++) {
+    //         const theta = Math.random()*Math.PI*2; 
+    //         const phaseOff = zi * (Math.PI / 2.5); const peaks = 3 + (zi * 1.6);
+    //         const jitterArr = (Math.random()-0.5)*0.025;
+    //         const radius = noiseConfig.baseRadius + (zi * 0.05) + Math.sin((theta + phaseOff) * peaks) * 0.12 + jitterArr;
+    //         const phi = (Math.PI / 2) + [-0.15, -0.05, 0.05, 0.15][zi];
+    //         streamPos[i*3] = radius * Math.sin(phi) * Math.cos(theta); streamPos[i*3+1] = radius * Math.sin(phi) * Math.sin(theta); streamPos[i*3+2] = radius * Math.cos(phi);
+    //         randomSeeds[i] = Math.random() * 1000; 
+    //     }
+    //     streamGeo.setAttribute('position', new THREE.BufferAttribute(streamPos, 3));
+    //     const sMat = new THREE.PointsMaterial({ size: noiseConfig.pSize * 0.25, color: new THREE.Color(hex), transparent: true, opacity: 0.99, map: particleTex, blending: THREE.AdditiveBlending, depthWrite: false });
+    //     const sPoints = new THREE.Points(streamGeo, sMat);
+        
+    //     Object.assign(sPoints.userData, { isStream: true, randomSeeds }); 
+    //     sPoints.renderOrder = 2; 
+    //     group.add(sPoints);
+    // });
+
+    const streamColors = ['#717874', '#717874', '#1f117d', '#8d1c7e']; 
+streamColors.forEach((hex, zi) => {
+    const streamGeo = new THREE.BufferGeometry(); 
+    const count = 1500; 
+    const streamPos = new Float32Array(count * 3); // Fixed: count * 3 for x,y,z
+    const randomSeeds = new Float32Array(count); 
+
+    for(let i=0; i<count; i++) {
+        const theta = Math.random() * Math.PI * 2; 
+        
+        // --- THE TWEAKS ---
+        // 1. Phase offset remains to keep streams slightly asynchronous
+        const phaseOff = zi * (Math.PI / 4); 
+        
+        // 2. DECREASE WAVES: Lower the peak frequency and the sine amplitude
+        // Change 1.6 to 0.5 to make the waves much longer/flatter
+        const peaks = 2 + (zi * 0.5); 
+        
+        // 3. MAKE IT CLOSER: Reduce the zi multiplier (0.05 -> 0.02) 
+        // and reduce the sine intensity (0.12 -> 0.04)
+        const jitterArr = (Math.random() - 0.5) * 0.015; // Tighten jitter
+        const radius = noiseConfig.baseRadius + (zi * 0.02) + Math.sin((theta + phaseOff) * peaks) * 0.04 + jitterArr;
+
+        // 4. VERTICAL CLOSENESS: Reduce the spacing in the phi array
+        const phi = (Math.PI / 2) + [-0.04, -0.01, 0.01, 0.04][zi];
+        
+        // Convert Spherical to Cartesian
+        streamPos[i*3] = radius * Math.sin(phi) * Math.cos(theta); 
+        streamPos[i*3+1] = radius * Math.sin(phi) * Math.sin(theta); 
+        streamPos[i*3+2] = radius * Math.cos(phi);
+        
+        randomSeeds[i] = Math.random() * 1000; 
+    }
+
+    streamGeo.setAttribute('position', new THREE.BufferAttribute(streamPos, 3));
+    // Store a copy of the base (rest) positions so we can oscillate cleanly
+    const baseStreamPos = new Float32Array(streamPos);
+    const sMat = new THREE.PointsMaterial({ 
+        size: noiseConfig.pSize * 0.25, 
+        color: new THREE.Color(hex), 
+        transparent: true, 
+        opacity: 0.99, 
+        map: particleTex, 
+        blending: THREE.AdditiveBlending, 
+        depthWrite: false 
+    });
+    
+    const sPoints = new THREE.Points(streamGeo, sMat);
+    Object.assign(sPoints.userData, { isStream: true, randomSeeds, baseStreamPos, streamLayerIndex: zi }); 
+    sPoints.renderOrder = 2; 
+    group.add(sPoints);
+});
+
+    if (window.innerWidth > 768) {
+        const spreadCount = 100; 
+        const spreadGeo = new THREE.BufferGeometry();
+        const spreadPos = new Float32Array(spreadCount * 3);
+        for(let i=0; i<spreadCount; i++) {
+            const theta = Math.random()*Math.PI*2; 
+            const phi = Math.acos((Math.random()*2)-1);
+            const radius = Math.cbrt(Math.random()) * (noiseConfig.baseRadius * 0.95); 
+            spreadPos[i*3] = radius*Math.sin(phi)*Math.cos(theta); 
+            spreadPos[i*3+1] = radius*Math.sin(phi)*Math.sin(theta); 
+            spreadPos[i*3+2] = radius*Math.cos(phi);
+        }
+        spreadGeo.setAttribute('position', new THREE.BufferAttribute(spreadPos, 3));
+        
+        const spreadMat = new THREE.PointsMaterial({ 
+            size: noiseConfig.pSize * 0.1, 
+            color: new THREE.Color('#ba28bd'),
+            transparent: true, 
+            opacity: 0.4, 
+            map: solidCircleTex, 
+            blending: THREE.AdditiveBlending, 
+            depthWrite: false 
+        });
+      
+        const spreadPoints = new THREE.Points(spreadGeo, spreadMat); 
+        spreadPoints.renderOrder = 2; 
+        group.add(spreadPoints);
+    }
+
+    if (window.innerWidth <= 768) {
+        group.scale.set(0.62, 0.62, 0.62); 
+    }
+    group.userData.baseScale = group.scale.x;
+
+    scene.add(group); orbs.push(group); floatData.push({speed: noiseConfig.floatSpeed, phase: id*2.5});
+}
+
+createParticleOrb(0, [5, 3, -0.5], { freqX: 3.0, freqY: 3.0, amp: 0.9, baseRadius: 2.6, pSize: 0.13, rotBase: 0.0003, rotVar: 0.0005, floatSpeed: 0.45 });
+createParticleOrb(1, [-4.8, -3.2, -0.3], { freqX: 2.5, freqY: 2.0, amp: 0.3, baseRadius: 2.5, pSize: 0.12, rotBase: 0.0002, rotVar: 0.0006, floatSpeed: 0.55, particleMult: 0.25 });
+
+// ── ORB ENTRANCE SYSTEM ──────────────────────────────────────────────
+const orbEntranceOffset = [
+    { x: 38, y: -6, scaleBoost: 0 },   // orb 0 — enters from RIGHT
+    { x: -38, y:  6, scaleBoost: 0 }   // orb 1 — enters from LEFT
+];
+motionParams.visibility = 0; // hidden until entrance fires
+
+// Pre-warp orb physical positions to off-screen so the lerp STARTS from there
+orbs[0].position.set(38, -6, 0);
+orbs[1].position.set(-38, 6, 0);
+
+// Reusable entrance — called on first load AND every scroll-back to top.
+let _orbEntranceTl = null;
+function playOrbEntrance() {
+    // Kill any in-progress entrance
+    if (_orbEntranceTl) { _orbEntranceTl.kill(); _orbEntranceTl = null; }
+
+    // Reset offsets AND physical orb positions to off-screen before animating
+    orbEntranceOffset[0].x = 38;  orbEntranceOffset[0].y = -6;
+    orbEntranceOffset[1].x = -38; orbEntranceOffset[1].y =  6;
+    motionParams.visibility = 0;
+    motionParams.spread = 1.0;
+
+    // Snap orb 3D positions to match the off-screen start so lerp begins from there
+    orbs[0].position.set(38, -6, orbs[0].position.z);
+    orbs[1].position.set(-38, 6, orbs[1].position.z);
+
+    const label0 = document.getElementById('orb-label-0');
+    const label1 = document.getElementById('orb-label-1');
+    gsap.set([label0, label1], { opacity: 0, x: 0, filter: 'blur(14px)', scale: 1 });
+
+    _orbEntranceTl = gsap.timeline();
+
+    // Canvas flash
+    _orbEntranceTl.fromTo('#canvas',
+        { filter: 'brightness(0)' },
+        { filter: 'brightness(1)', duration: 0.35, ease: 'power2.out' }, 0
+    );
+
+    // Orbs fly in from sides
+    _orbEntranceTl.to(orbEntranceOffset[0], { x: 0, y: 0, duration: 0.75, ease: 'expo.out' }, 0);
+    _orbEntranceTl.to(orbEntranceOffset[1], { x: 0, y: 0, duration: 0.75, ease: 'expo.out' }, 0.1);
+
+    // Particles fade in alongside orbs
+    _orbEntranceTl.to(motionParams, { visibility: 1, duration: 0.5, ease: 'power2.out' }, 0);
+
+    // Labels slide in from their respective sides
+    _orbEntranceTl.fromTo(label0,
+        { opacity: 0, x: 80, filter: 'blur(14px)' },
+        { opacity: 1, x: 0,  filter: 'blur(0px)', duration: 0.55, ease: 'expo.out' }, 0.1
+    );
+    _orbEntranceTl.fromTo(label1,
+        { opacity: 0, x: -80, filter: 'blur(14px)' },
+        { opacity: 1,  x: 0,  filter: 'blur(0px)', duration: 0.55, ease: 'expo.out' }, 0.18
+    );
+
+    // Scale punch on settle
+    _orbEntranceTl.fromTo(label0, { scale: 1.12 }, { scale: 1, duration: 0.4, ease: 'elastic.out(1, 0.5)' }, 0.45);
+    _orbEntranceTl.fromTo(label1, { scale: 1.12 }, { scale: 1, duration: 0.4, ease: 'elastic.out(1, 0.5)' }, 0.5);
+
+    _orbEntranceTl.call(() => {
+        gsap.set([label0, label1], { clearProps: 'x,scale,filter' });
+        mainTl.invalidate();
+    }, [], 1.0);
+}
+
+// ── AGENT.PNG BACKGROUND FOR TOP-RIGHT ORB (orb 0) ──
+const agentImgData = 'agent.png'; 
+const agentTexLoader = new THREE.TextureLoader();
+const agentOrbTex = agentTexLoader.load(agentImgData);
+agentOrbTex.wrapS = THREE.ClampToEdgeWrapping;
+agentOrbTex.wrapT = THREE.ClampToEdgeWrapping;
+// Apply to the glow sprite of orb 0
+orbs[0].children.forEach(child => {
+    if (child.userData.isGlowSprite) {
+        child.material.map = agentOrbTex;
+        child.material.blending = THREE.AdditiveBlending;
+        child.material.color.set(0xffffff);
+        child.material.opacity = 0.95;
+        child.material.needsUpdate = true;
+        // Scale up for visibility
+        const newScale = child.userData.baseGlowScale * 1.6;
+        child.scale.set(newScale, newScale, 1);
+        child.userData.baseGlowScale = newScale;
+    }
+});
+
+// ── ORB2.PNG BACKGROUND FOR BOTTOM-LEFT ORB (orb 1) ──
+const orb2ImgData = 'orb2.png';
+const orb2TexLoader = new THREE.TextureLoader();
+const orb2Tex = orb2TexLoader.load(orb2ImgData);
+orb2Tex.wrapS = THREE.ClampToEdgeWrapping;
+orb2Tex.wrapT = THREE.ClampToEdgeWrapping;
+// Apply to the glow sprite of orb 1
+orbs[1].children.forEach(child => {
+    if (child.userData.isGlowSprite) {
+        child.material.map = orb2Tex;
+        child.material.blending = THREE.AdditiveBlending;
+        child.material.color.set(0xffffff);
+        child.material.opacity = 0.95;
+        child.material.needsUpdate = true;
+        const newScale = child.userData.baseGlowScale * 1.6;
+        child.scale.set(newScale, newScale, 1);
+        child.userData.baseGlowScale = newScale;
+    }
+});
+
+const bgCount = 5000; const bgGeo = new THREE.BufferGeometry(); const bgPosArr = new Float32Array(bgCount * 3); const bgVelArr = new Float32Array(bgCount * 3); const bgColorsArr = new Float32Array(bgCount * 3);
+const stardustPalette = [new THREE.Color('#918db7'), new THREE.Color('#a58f93'), new THREE.Color('#641270')];
+for(let i=0; i<bgCount; i++) {
+    bgPosArr[i*3] = (Math.random()-0.5)*50; bgPosArr[i*3+1] = (Math.random()-0.5)*50; bgPosArr[i*3+2] = (Math.random()-0.5)*10;
+    bgVelArr[i*3] = (Math.random()-0.5)*0.005; bgVelArr[i*3+1] = (Math.random()-0.5)*0.005; bgVelArr[i*3+2] = (Math.random()-0.3)*0.005;
+    const col = stardustPalette[Math.floor(Math.random() * stardustPalette.length)];
+    bgColorsArr[i*3] = col.r; bgColorsArr[i*3+1] = col.g; bgColorsArr[i*3+2] = col.b;
+}
+bgGeo.setAttribute('position', new THREE.BufferAttribute(bgPosArr, 3)); bgGeo.setAttribute('color', new THREE.BufferAttribute(bgColorsArr, 3));
+
+const bgPoints = new THREE.Points(bgGeo, new THREE.PointsMaterial({ 
+    size: 0.3, 
+    vertexColors: true, 
+    transparent: true, 
+    opacity: 0.8, // This is your "First Load" value
+    map: particleTex, 
+    blending: THREE.AdditiveBlending, 
+    depthWrite: false 
+}));
+scene.add(bgPoints); 
+
+const rockGroup = new THREE.Group(); const crystals = [];
+
+const wallTextureLoader = new THREE.TextureLoader();
+
+const wallTex = wallTextureLoader.load('wall.png');
+
+wallTex.wrapS = THREE.RepeatWrapping;
+wallTex.wrapT = THREE.RepeatWrapping;
+wallTex.repeat.set(2, 2);
+
+const tunnelSegments = 6;
+const tunnelGeo = new THREE.CylinderGeometry(18, 12, 80, 32, tunnelSegments, true);
+const tunnelMat = new THREE.MeshStandardMaterial({
+    map: wallTex,
+    roughness: 0.95,
+    metalness: 0.05,
+    side: THREE.BackSide,
+    transparent: true,
+    opacity: 0,
+});
+const tunnelMesh = new THREE.Mesh(tunnelGeo, tunnelMat);
+tunnelMesh.position.set(0, 0, -20);
+tunnelMesh.rotation.x = Math.PI / 2;
+rockGroup.add(tunnelMesh);
+crystals.push({ mesh: tunnelMesh, light: { intensity: 0 }, rotSpeed: 0.0001 });
+
+for(let ring = 0; ring < 5; ring++) {
+    const ringRadius = 10 - ring * 1.2;
+    const ringGeo = new THREE.TorusGeometry(ringRadius, 0.18, 8, 48);
+    const ringMat = new THREE.MeshStandardMaterial({
+        map: wallTex,
+        roughness: 1.0,
+        metalness: 0.0,
+        transparent: true,
+        opacity: 0,
+        emissive: new THREE.Color(0x0a0505),
+        emissiveIntensity: 0.1,
+    });
+    const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+    ringMesh.position.set(0, 0, -22 - ring * 5);
+    rockGroup.add(ringMesh);
+    crystals.push({ mesh: ringMesh, light: { intensity: 0 }, rotSpeed: 0.0003 + ring * 0.0001 });
+}
+
+const slabData = [
+    { pos: [-14,  6, -15], rot: [0.1,  0.4, 0.05], scl: [1.0, 1.3, 0.3] },
+    { pos: [ 14,  4, -15], rot: [0.05,-0.4, 0.02], scl: [1.0, 1.2, 0.3] },
+    { pos: [-12, -5, -17], rot: [0.2,  0.3, 0.1],  scl: [0.9, 1.1, 0.25]},
+    { pos: [ 12, -6, -17], rot: [0.1, -0.3, 0.08], scl: [0.9, 1.0, 0.25]},
+    { pos: [  0, 11, -16], rot: [0.4,  0.0, 0.0],  scl: [2.0, 0.7, 0.2] },
+    { pos: [  0,-11, -16], rot: [-0.4, 0.0, 0.0],  scl: [2.0, 0.7, 0.2] },
+    { pos: [-16,  0, -20], rot: [0.0,  0.5, 0.0],  scl: [0.8, 1.8, 0.3] },
+    { pos: [ 16,  0, -20], rot: [0.0, -0.5, 0.0],  scl: [0.8, 1.8, 0.3] },
+];
+
+slabData.forEach((sd, i) => {
+    const w = 8 + Math.random() * 6;
+    const h = 10 + Math.random() * 8;
+    const slabGeo = new THREE.BoxGeometry(w, h, 1.2, 2, 3, 1);
+    const pos = slabGeo.attributes.position.array;
+    for(let j = 0; j < pos.length; j += 3) {
+        pos[j]   += (Math.random() - 0.5) * 0.8;
+        pos[j+1] += (Math.random() - 0.5) * 0.8;
+        pos[j+2] += (Math.random() - 0.5) * 0.3;
+    }
+    slabGeo.attributes.position.needsUpdate = true;
+    slabGeo.computeVertexNormals();
+
+    const slabMat = new THREE.MeshStandardMaterial({
+        map: wallTex,
+        roughness: 0.97,
+        metalness: 0.02,
+        transparent: true,
+        opacity: 0,
+        emissive: new THREE.Color(0x050202),
+        emissiveIntensity: 0.05,
+    });
+    const slab = new THREE.Mesh(slabGeo, slabMat);
+    slab.position.set(...sd.pos);
+    slab.rotation.set(...sd.rot);
+    slab.scale.set(...sd.scl);
+    rockGroup.add(slab);
+    crystals.push({ mesh: slab, light: { intensity: 0 }, rotSpeed: 0 });
+});
+
+const depthSpotlight = new THREE.SpotLight(0xfff5e0, 0, 50, Math.PI * 0.12, 0.4, 1.5);
+depthSpotlight.position.set(0, 0, 12);
+depthSpotlight.target.position.set(0, 0, -40);
+scene.add(depthSpotlight);
+scene.add(depthSpotlight.target);
+
+const rimLight1 = new THREE.PointLight(0x1a0a00, 0, 35);
+rimLight1.position.set(-10, 5, -8);
+scene.add(rimLight1);
+
+const rimLight2 = new THREE.PointLight(0x00050a, 0, 35);
+rimLight2.position.set(10, -5, -8);
+scene.add(rimLight2);
+
+scene.add(rockGroup); rockGroup.visible = false; 
+
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+function wrapLines(el) {
+    const text = el.innerHTML;
+    const lines = text.split(/<br.*?>/g);
+    el.innerHTML = "";
+    lines.forEach(line => {
+        const span = document.createElement("span");
+        span.className = "line-wrapper";
+        span.innerHTML = `<span class="text-line">${line}</span>`;
+        el.appendChild(span);
+    });
+}
+document.querySelectorAll('.service-title, .service-desc').forEach(wrapLines);
+
+const mainTl = gsap.timeline({ 
+    scrollTrigger: { 
+        trigger: ".scroll-height", 
+        start: "top top", 
+        end: "bottom bottom", 
+        scrub: 0.7,
+        onUpdate: (self) => {
+            const p = self.progress;
+            // wallProgress now tracks from the very first scroll pixel — no dead zone
+            const wallProgress = p;
+            
+            depthSpotlight.intensity = Math.min(wallProgress * 5.0, 3.5);
+            depthSpotlight.angle = Math.PI * (0.12 + wallProgress * 0.09);
+            
+            rimLight1.intensity = wallProgress * 1.4;
+            rimLight2.intensity = wallProgress * 1.0;
+            
+            camera.rotation.z = Math.sin(wallProgress * Math.PI * 0.5) * 0.03;
+
+            const descentEl = document.getElementById("descent-vignette");
+            const lightShaftEl = document.getElementById("light-shaft");
+            if (descentEl) {
+                const vignetteOpacity = Math.min(wallProgress * 1.1, 0.88);
+                descentEl.style.opacity = vignetteOpacity;
+            }
+            if (lightShaftEl) {
+                const shaftPeak = 1 - Math.abs(wallProgress - 0.5) * 2;
+                lightShaftEl.style.opacity = Math.max(0, shaftPeak * 0.9);
+            }
+
+            // When user scrolls back near the top, release the force-hidden lock
+            // so the hero text can reappear naturally via the scrub.
+            const heroEl = document.getElementById('hero-layer');
+            if (heroEl && heroEl.classList.contains('force-hidden') && p < 0.015) {
+                heroEl.classList.remove('force-hidden');
+                // Clear any GSAP-set inline styles so the scrub can drive the
+                // hero text back to fully visible as progress returns to 0.
+                gsap.set(heroEl, { clearProps: 'opacity,visibility,filter,scale,transform' });
+            }
+
+            // Detect scroll-back to top and re-fire the slide-in entrance.
+            if (p < 0.008 && self._prevProgress >= 0.008) {
+                playOrbEntrance();
+            }
+            self._prevProgress = p;
+
+            // While agent text animations are pinned, prevent the scrub from
+            // overriding the section's visibility with its interpolated values.
+            if (document.body.classList.contains('agent-anim-active')) {
+                const agentEl = document.getElementById('new-agent-section');
+                if (agentEl) { agentEl.style.visibility = 'visible'; agentEl.style.opacity = '1'; }
+            }
+        }
+    } 
+});
+
+// ── OPENING SCROLL CHOREOGRAPHY ─────────────────────────────────
+// STEP 1 (0–0.30) : Everything in the hero fades out FIRST — text, orbs, labels, shadows
+mainTl.to("#hero-layer", { opacity: 0, filter: "blur(18px)", scale: 0.92, duration: 0.28, ease: "power1.inOut" }, 0);
+mainTl.to(["#cosmic-shadow-line", "#cosmic-shadow-line2"], { x: -800, opacity: 0, duration: 0.22, ease: "power2.out" }, 0);
+mainTl.to("#orb-label-0", { opacity: 0, x: 60,  filter: "blur(8px)", duration: 0.22, ease: "power1.inOut" }, 0.04);
+mainTl.to("#orb-label-1", { opacity: 0, x: -60, filter: "blur(8px)", duration: 0.22, ease: "power1.inOut" }, 0.04);
+mainTl.to(motionParams, { spread: 6.5, duration: 0.26, ease: "power2.inOut" }, 0.04);
+mainTl.to(motionParams, { visibility: 0, duration: 0.06 }, 0.28);
+mainTl.to(bgPoints.material, { opacity: 0, duration: 0.14, ease: "power2.out" }, 0.16);
+
+// STEP 2 (0.32–0.72) : THEN camera zooms forward into the scene
+mainTl.to(camera.position, { z: -28, ease: "power1.inOut", duration: 0.40 }, 0.32);
+mainTl.to(camera, { fov: 88, onUpdate: () => camera.updateProjectionMatrix(), ease: "power1.inOut", duration: 0.40 }, 0.32);
+
+mainTl.set(rockGroup, { visible: true }, 0); 
+crystals.forEach((c, ci) => { 
+    const staggerDelay = ci * 0.02;
+    mainTl.to(c.mesh.material, { opacity: ci === 0 ? 0.82 : (ci <= 5 ? 0.55 : 0.7), duration: 0.25, ease: "power2.out" }, staggerDelay); 
+});
+
+mainTl.to(camera, { fov: 75, onUpdate: () => camera.updateProjectionMatrix(), ease: "power2.inOut", duration: 2.0 }, 1.2);
+mainTl.to(camera, { fov: 92, onUpdate: () => camera.updateProjectionMatrix(), ease: "power1.inOut", duration: 3.0 }, 4.5);
+
+mainTl.to(tunnelMesh.material, { opacity: 0.92, ease: "power1.inOut", duration: 1.0 }, 2.0);
+mainTl.to(tunnelMesh.material, { opacity: 0.6, ease: "sine.inOut", duration: 1.0 }, 3.5);
+mainTl.to(tunnelMesh.material, { opacity: 0.85, ease: "power1.out", duration: 1.5 }, 5.5);
+
+const ids = ["#m1", "#m2", "#m3", "#m4", "#m5", "#m6"];
+
+// Mysterious Water/Rain Shader Effect
+let wallShaderMat, wallRenderer, wallScene, wallCamera, wallMesh;
+const wallShaderUniforms = { time: { value: 0 }, opacity: { value: 0 } };
+
+function initWallAnimation() {
+    const wallCanvas = document.getElementById('wall-canvas');
+    if (!wallCanvas) return;
+    
+    wallRenderer = new THREE.WebGLRenderer({ canvas: wallCanvas, antialias: false, alpha: true });
+    // Use pixelRatio 1 for the wall shader — it's a blurred background effect,
+    // full device pixel ratio has no visible benefit but doubles GPU work on retina screens
+    wallRenderer.setPixelRatio(1);
+    wallRenderer.setSize(window.innerWidth, window.innerHeight);
+    
+    wallScene = new THREE.Scene();
+    wallCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    wallCamera.position.z = 5;
+
+    const vertexShader = `
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `;
+
+    const fragmentShader = `
+        uniform float time;
+        uniform float opacity;
+        varying vec2 vUv;
+        
+        float random(vec2 st) {
+            return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+        }
+        
+        float noise(vec2 st) {
+            vec2 i = floor(st);
+            vec2 f = fract(st);
+            f = f * f * (3.0 - 2.0 * f);
+            float a = random(i);
+            float b = random(i + vec2(1.0, 0.0));
+            float c = random(i + vec2(0.0, 1.0));
+            float d = random(i + vec2(1.0, 1.0));
+            return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+        }
+
+        // Fractal Brownian Motion for organic complexity
+        float fbm(vec2 st) {
+            float value = 0.0;
+            float amplitude = 0.5;
+            for (int i = 0; i < 3; i++) {
+                value += amplitude * noise(st);
+                st *= 2.0;
+                amplitude *= 0.5;
+            }
+            return value;
+        }
+        
+        void main() {
+            vec2 uv = vUv;
+            
+            // Distort UVs for organic flow (curvy but not circular)
+            vec2 distortion = vec2(
+                fbm(uv * 2.0 + time * 0.2),
+                fbm(uv * 2.0 - time * 0.3)
+            ) * 0.15;
+            
+            vec2 distortedUv = uv + distortion;
+            
+            // Create fluid, undulating streams
+            float flow = fbm(vec2(distortedUv.x * 3.5, distortedUv.y * 1.5 - time * 0.45));
+            
+            // Soft, curvy vertical patterns
+            float vertical = smoothstep(0.3, 0.7, fbm(vec2(distortedUv.x * 5.0, time * 0.1)));
+            
+            // Combine for a "living shadow" effect - sharpened for more solidity
+            float waterEffect = smoothstep(0.3, 0.45, flow * 0.7 + vertical * 0.3);
+            
+            // Color with mystery - solid black and deep charcoal
+            vec3 waterColor = mix(
+                vec3(0.0, 0.0, 0.0),      // Pure black
+                vec3(0.02, 0.02, 0.025),  // Solid dark charcoal
+                sin(time * 0.3) * 0.5 + 0.5
+            );
+            
+            // Subtle glisten to define the solid edges
+            waterColor += vec3(0.05, 0.05, 0.06) * waterEffect;
+            
+            // Increased final alpha for a more solid, opaque presence
+            float finalAlpha = smoothstep(0.1, 0.5, waterEffect) * opacity * 1.5;
+            gl_FragColor = vec4(waterColor, clamp(finalAlpha, 0.0, 1.0));
+        }
+    `;
+
+    wallShaderMat = new THREE.ShaderMaterial({
+        uniforms: wallShaderUniforms,
+        vertexShader: vertexShader,
+        fragmentShader: fragmentShader,
+        transparent: true,
+        blending: THREE.AdditiveBlending
+    });
+
+    const wallGeo = new THREE.PlaneGeometry(10, 10);
+    wallMesh = new THREE.Mesh(wallGeo, wallShaderMat);
+    wallScene.add(wallMesh);
+}
+initWallAnimation();
+
+// Fade in wall.png background — only after zoom is underway
+mainTl.to("#manifesto-overlay", { opacity: 1, duration: 0.4, ease: "power2.in" }, 0.62);
+if (wallShaderMat) {
+    mainTl.to(wallShaderUniforms.opacity, { value: 0.8, duration: 2, ease: "sine.inOut" }, 0.62);
+}
+
+ids.forEach((id, index) => {
+    const section = document.querySelector(id);
+    const lines = section.querySelectorAll('.text-line');
+    const enterTime = 0.5 + (index * 1.5);
+    const exitTime = enterTime + 1.2;
+    // On mobile, skip scroll-scrub text-line animations (handled by CSS + mobile autoplay)
+    if (window.innerWidth <= 768) {
+        mainTl.to(section, { autoAlpha: 1, duration: 0.01 }, enterTime);
+        if (index < ids.length - 1) {
+            mainTl.to(section, { autoAlpha: 0, duration: 0.01 }, exitTime + 0.6);
+        } else {
+            mainTl.to(section, { autoAlpha: 0, duration: 0.01 }, exitTime + 1.2);
+        }
+        return;
+    }
+    mainTl.to(section, { autoAlpha: 1, duration: 0.1 }, enterTime);
+    mainTl.to(lines, { opacity: 1, y: "0%", filter: "blur(0px)", duration: 0.7, stagger: 0.1, ease: "power3.out" }, enterTime);
+    if (index < ids.length - 1) {
+        mainTl.to(lines, { opacity: 0, y: "-50%", filter: "blur(15px)", duration: 0.5, stagger: 0.05, ease: "power2.in" }, exitTime);
+        mainTl.to(section, { autoAlpha: 0, duration: 0.1 }, exitTime + 0.6);
+    } else {
+        mainTl.to(lines, { opacity: 0, y: "-50%", filter: "blur(15px)", duration: 0.5, stagger: 0.05, ease: "power2.in" }, exitTime + 0.6);
+        mainTl.to(section, { autoAlpha: 0, duration: 0.1 }, exitTime + 1.2);
+    }
+});
+
+// Fade out wall.png background after last manifesto section disappears
+// Last section (index 5): enterTime = 0.5 + 5*1.5 = 8.0, exitTime = 9.2, hides at 10.4
+mainTl.to("#manifesto-overlay", { opacity: 0, duration: 0.4, ease: "power2.out" }, 10.6);
+
+// ═══════════════════════════════════════════════════════════
+//  MOBILE MANIFESTO AUTO-PLAY (no scroll required on mobile)
+// ═══════════════════════════════════════════════════════════
+(function initMobileManifesto() {
+    if (window.innerWidth > 768) return;
+
+    const overlay  = document.getElementById('manifesto-overlay');
+    const sections = Array.from(document.querySelectorAll('.manifesto-section'));
+    const ALL_ANIM = ['m-anim-slide-up','m-anim-slide-left','m-anim-scale-in',
+                      'm-anim-slide-right','m-anim-glitch-in','m-anim-flip-in'];
+
+    const DWELL_MS      = 2600;
+    const EXIT_MS       = 450;
+    const ENTER_DELAY   = 120;
+
+    // ── State ─────────────────────────────────────────────
+    let running   = false;   // sequence is live
+    let seqId     = 0;       // incremented on every reset — invalidates stale callbacks
+    let timers    = [];      // all pending setTimeout IDs for this run
+
+    // ── Helpers ───────────────────────────────────────────
+    function addTimer(fn, ms, id) {
+        // Only run if the sequence id still matches
+        const t = setTimeout(() => { if (seqId === id) fn(); }, ms);
+        timers.push(t);
+        return t;
+    }
+
+    function clearAllTimers() {
+        timers.forEach(clearTimeout);
+        timers = [];
+    }
+
+    function resetSections() {
+        sections.forEach(s => {
+            s.classList.remove('mobile-manifesto-active', 'mobile-manifesto-exit', ...ALL_ANIM);
+            gsap.set(s, { autoAlpha: 0, clearProps: 'visibility' });
+            s.querySelectorAll('.text-line').forEach(el => {
+                el.style.opacity = el.style.transform = el.style.filter = '';
+            });
+        });
+    }
+
+    // ── Show / exit ───────────────────────────────────────
+    function showSection(idx, id) {
+        if (seqId !== id || !running) return;
+        if (idx >= sections.length) {
+            gsap.to(overlay, { opacity: 0, duration: 0.55, ease: 'power2.out',
+                onComplete: () => { overlay.classList.remove('wall-active','mobile-manifesto-live'); }
+            });
+            running = false;
+            return;
+        }
+
+        const sec = sections[idx];
+        const animClass = ALL_ANIM[idx % ALL_ANIM.length];
+
+        gsap.set(sec, { autoAlpha: 1 });
+        sec.querySelectorAll('.text-line').forEach(el => {
+            el.style.opacity = el.style.transform = el.style.filter = '';
+        });
+        sec.classList.remove(...ALL_ANIM, 'mobile-manifesto-exit');
+        sec.classList.add('mobile-manifesto-active', animClass);
+
+        addTimer(() => exitSection(idx, id), DWELL_MS, id);
+    }
+
+    function exitSection(idx, id) {
+        if (seqId !== id || !running) return;
+        const sec = sections[idx];
+        sec.classList.add('mobile-manifesto-exit');
+        addTimer(() => {
+            if (seqId !== id || !running) return;
+            sec.classList.remove('mobile-manifesto-active', 'mobile-manifesto-exit', ...ALL_ANIM);
+            gsap.set(sec, { autoAlpha: 0 });
+            addTimer(() => showSection(idx + 1, id), ENTER_DELAY, id);
+        }, EXIT_MS, id);
+    }
+
+    // ── Start / reset ─────────────────────────────────────
+    function startSequence() {
+        if (running) return;
+        running = true;
+        seqId++;                    // invalidate any stale callbacks from previous run
+        clearAllTimers();
+        resetSections();
+
+        overlay.style.opacity = '1';
+        overlay.classList.add('wall-active', 'mobile-manifesto-live');
+        if (wallShaderUniforms) {
+            gsap.to(wallShaderUniforms.opacity, { value: 0.8, duration: 1.5, ease: 'sine.inOut' });
+        }
+
+        const id = seqId;
+        addTimer(() => showSection(0, id), 400, id);
+    }
+
+    function resetSequence(instant) {
+        if (!running) return;
+        running = false;
+        seqId++;                    // kill all pending callbacks
+        clearAllTimers();
+        resetSections();
+
+        if (instant) {
+            // Scrolled forward past manifesto — hide immediately, no fade
+            gsap.set(overlay, { opacity: 0 });
+            overlay.classList.remove('wall-active', 'mobile-manifesto-live');
+            if (wallShaderUniforms) gsap.set(wallShaderUniforms.opacity, { value: 0 });
+        } else {
+            // Scrolled back to top — gentle fade out
+            gsap.to(overlay, { opacity: 0, duration: 0.35, ease: 'power2.out',
+                onComplete: () => { overlay.classList.remove('wall-active','mobile-manifesto-live'); }
+            });
+            if (wallShaderUniforms) {
+                gsap.to(wallShaderUniforms.opacity, { value: 0, duration: 0.4 });
+            }
+        }
+    }
+
+    // ── Scroll watcher ────────────────────────────────────
+    // Progress thresholds (based on mainTl keyframes / total duration ~12.5s):
+    //   Manifesto zone:  p >= 0.08  (overlay fades in)
+    //   Agent zone:      p >= 0.82  (agent section appears — manifesto must be gone)
+    //   Reset to top:    p <  0.05
+    const P_START = 0.08;
+    const P_END   = 0.82;   // hard stop — past here the agent window takes over
+    const P_RESET = 0.05;
+
+    ScrollTrigger.create({
+        trigger: '.scroll-height',
+        start: 'top top',
+        end: 'bottom bottom',
+        onUpdate: (self) => {
+            const p = self.progress;
+
+            if (p >= P_START && p < P_END && !running) {
+                // Entered manifesto zone — start sequence
+                startSequence();
+            } else if (p < P_RESET && running) {
+                // Scrolled back to top — gentle fade
+                resetSequence(false);
+            } else if (p >= P_END && running) {
+                // Scrolled forward past manifesto into agent zone — hide immediately
+                resetSequence(true);
+            }
+        }
+    });
+
+})();
+
+const agentStartTime = 10.5;
+let agentTriggered = false;
+
+crystals.forEach((c) => { 
+    mainTl.to(c.mesh.material, { opacity: 0, duration: 0.6, ease: "power2.inOut" }, agentStartTime - 0.6); 
+});
+mainTl.to(depthSpotlight, { intensity: 0, duration: 0.5, ease: "power2.inOut" }, agentStartTime - 0.5);
+mainTl.to(rimLight1, { intensity: 0, duration: 0.5 }, agentStartTime - 0.5);
+mainTl.to(rimLight2, { intensity: 0, duration: 0.5 }, agentStartTime - 0.5);
+
+mainTl.to("#new-agent-section", { 
+    autoAlpha: 1, 
+    duration: 0.4,
+    onStart: () => {
+        if(!agentTriggered) { 
+            triggerAgentText(); 
+            agentTriggered = true;
+            gsap.fromTo("#new-agent-section", 
+                { filter: "brightness(3) blur(8px)" },
+                { filter: "brightness(1) blur(0px)", duration: 0.8, ease: "power2.out" }
+            );
+            gsap.to("#descent-vignette", { opacity: 0, duration: 0.6, ease: "power2.out" });
+            gsap.to("#light-shaft", { opacity: 0, duration: 0.4 });
+
+            // Fade-in the title with a smooth upward drift + unblur
+            gsap.fromTo("#agent-selection-title",
+                { opacity: 0, y: 18, filter: "blur(10px)" },
+                { opacity: 1, y: 0, filter: "blur(0px)", duration: 1.1, delay: 0.25, ease: "power3.out",
+                  clearProps: "filter" }
+            );
+        }
+    },
+    onReverseComplete: () => {
+        agentTriggered = false;
+        // Release any active scroll lock immediately on reverse
+        document.body.classList.remove('agent-anim-active');
+        // Clear the pin-release callback — scrub is already live, no need to re-enable
+        window._agentPinRelease = null;
+        document.querySelectorAll('.agent-text-block').forEach(el => { el.style.opacity = 0; el.innerHTML = ""; });
+        // Reset title so it re-animates on next forward pass
+        gsap.set("#agent-selection-title", { opacity: 0, y: 18, filter: "blur(10px)" });
+        // Safety net: if force-hidden is still on hero-layer, remove it and clear
+        // any GSAP inline overrides so the hero text can reappear as scrub goes back to 0.
+        const heroEl = document.getElementById('hero-layer');
+        if (heroEl && heroEl.classList.contains('force-hidden')) {
+            heroEl.classList.remove('force-hidden');
+            gsap.set(heroEl, { clearProps: 'opacity,visibility,filter,scale,transform' });
+        }
+    }
+}, agentStartTime);
+
+mainTl.to("#new-agent-section", { 
+    autoAlpha: 0, 
+    filter: "blur(12px)",
+    duration: 0.6 
+}, agentStartTime + 2.0);
+
+gsap.to("#creative-footer", {
+    scrollTrigger: { trigger: "#creative-footer", start: "top 95%", toggleActions: "play none none reverse" },
+    opacity: 1, filter: "blur(0px)", y: 0, duration: 0.4, ease: "expo.out"
+});
+
+gsap.fromTo([".fg-left", ".status-block", ".links-block"], 
+    { opacity: 0, y: 20, filter: "blur(5px)" },
+    {
+        scrollTrigger: { trigger: "#creative-footer", start: "top 90%", toggleActions: "play none none reverse" },
+        opacity: 1, y: 0, filter: "blur(0px)", duration: 0.5, stagger: 0.08, ease: "power2.out"
+    }
+);
+
+function triggerAgentText() {
+    const blocks = document.querySelectorAll('.agent-text-block');
+    const total = blocks.length;
+    let completed = 0;
+
+    // Lock scroll for the entire duration of the agent text animations
+    document.body.classList.add('agent-anim-active');
+
+    blocks.forEach((block, index) => {
+        gsap.to(block, {
+            opacity: 1,
+            delay: index * 0.4,
+            duration: 0.3,
+            onStart: () => {
+                typeEffect(block, block.dataset.text, 15, () => {
+                    completed++;
+                    if (completed >= total) {
+                        // All typing done — release scroll after a short grace period
+                        setTimeout(() => {
+                            document.body.classList.remove('agent-anim-active');
+                            // Re-enable the scrub if it was disabled by the orb-click path
+                            if (typeof window._agentPinRelease === 'function') {
+                                window._agentPinRelease();
+                            }
+                        }, 600);
+                    }
+                });
+            }
+        });
+    });
+}
+
+let _mouseMoveScheduled = false;
+window.addEventListener('mousemove', (e) => {
+    if (_mouseMoveScheduled) return;
+    _mouseMoveScheduled = true;
+    requestAnimationFrame(() => {
+        mouse.x = (e.clientX/window.innerWidth)*2-1; 
+        mouse.y = -(e.clientY/window.innerHeight)*2+1;
+        _mouseMoveScheduled = false;
+    });
+});
+const clock = new THREE.Clock(); const labelVec = new THREE.Vector3();
+let _lastFrameTime = performance.now();
+
+let agentVideo;
+
+let orbHoverIndex = null; 
+
+let servicesDiveActive = false;
+let servicesDiveEntered = false;
+const servicesDiveOrbIndex = 1; 
+let servicesDiveOriginal = null;
+let servicesDiveTimeline = null;
+
+function startServicesDive() {
+    if (servicesDiveActive) return;
+    const overlayEl = document.getElementById('services-dive-overlay');
+    if (!overlayEl) return;
+
+    servicesDiveActive = true;
+    servicesDiveEntered = false;
+
+    // Existing dive logic...
+    document.body.classList.add('services-dive-active');
+    document.getElementById('services-scroll-container').scrollTop = 0;
+
+    // NEW: Entrance Timeline for "OUR SERVICES"
+    const introTl = gsap.timeline({ delay: 0.8 });
+
+    introTl.to("#services-intro-title", {
+        y: "0%",
+        duration: 1.2,
+        ease: "expo.out"
+    })
+    .to("#services-intro-desc", {
+        y: "0%",
+        opacity: 1,
+        duration: 1,
+        ease: "power3.out"
+    }, "-=0.8");
+
+    // Rest of your existing camera/orb transition logic...
+}
+function exitServicesDive() {
+    if (!servicesDiveActive) return;
+
+    servicesDiveActive = false;
+    servicesDiveEntered = false;
+    document.body.classList.remove('services-dive-active');
+
+    // Force return to top of page
+    window.scrollTo(0, 0);
+
+    try {
+        if (typeof mainTl !== 'undefined' && mainTl) {
+            mainTl.scrollTrigger.enable();
+            mainTl.progress(0);
+            mainTl.pause();
+        }
+    } catch (e) {}
+
+    const original = servicesDiveOriginal;
+    servicesDiveOriginal = null;
+
+    const tl = gsap.timeline();
+    
+    if (original) {
+        tl.to(camera, { 
+            fov: original.cameraFov, 
+            duration: 1.2, 
+            ease: "expo.out", 
+            onUpdate: () => camera.updateProjectionMatrix() 
+        }, 0)
+        .to(camera.position, { 
+            x: original.cameraPos.x, y: original.cameraPos.y, z: original.cameraPos.z, 
+            duration: 1.2, ease: "expo.out" 
+        }, 0)
+        // RESTORE BACKGROUND STARDUST: Ensure opacity returns to initial load state (0.8)
+        .to(bgPoints.material, { 
+            opacity: 0.8, 
+            duration: 1.0, 
+            ease: "power2.out" 
+        }, 0)
+        .to(motionParams, {
+            spread: original.motionSpread,
+            visibility: original.motionVisibility,
+            duration: 1.0
+        }, 0);
+    }
+
+    // Ensure the canvas filters are cleared to show original colors
+    tl.to('#canvas', { filter: 'blur(0px) brightness(1) saturate(1)', duration: 0.8 }, 0)
+      .to('#services-dive-overlay', { opacity: 0, duration: 0.3 }, 0)
+      .to('#descent-vignette', { opacity: 0, duration: 0.3 }, 0)
+      .call(() => {
+          // Clear any GSAP inline styles on hero-layer so CSS transition takes over cleanly
+          gsap.set('#hero-layer', { clearProps: 'opacity,filter,scale,transform' });
+      }, [], 0.3);
+}
+
+
+
+function bindOrbHoverInteractions() {
+    const label0 = document.getElementById('orb-label-0');
+    const label1 = document.getElementById('orb-label-1');
+if (label0) {
+    label0.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        // Use the ScrollTrigger's own pixel range — NOT maxScroll(window) which
+        // includes the footer and gives a completely wrong target position.
+        const st        = mainTl.scrollTrigger;
+        const totalDur  = mainTl.duration();
+        // Land safely inside the fully-visible window (fade-in ends at agentStartTime+0.4,
+        // exit starts at agentStartTime+2.0 — we aim for the midpoint).
+        const targetProgress = (agentStartTime + 1.0) / totalDur;
+        const scrollToPos    = st.start + targetProgress * (st.end - st.start);
+
+        document.getElementById('hero-layer').classList.add('force-hidden');
+
+        // Suppress manifesto overlay for the duration of the animated scroll
+        // (the scrub would otherwise flash it as timeline progress sweeps through)
+        const manifestoEl = document.getElementById('manifesto-overlay');
+        if (manifestoEl) manifestoEl.classList.add('orb-transition-hide');
+
+        gsap.to(window, {
+            scrollTo: { y: scrollToPos },
+            duration: 2.2,
+            ease: "expo.inOut",
+            onUpdate: () => camera.updateProjectionMatrix(),
+            onComplete: () => {
+                // ── 1. Freeze the scrub so it can NEVER override autoAlpha again ──
+                st.disable(false); // false = don't revert inline styles
+
+                // ── Now safe to remove the manifesto hide — scrub is frozen ──
+                if (manifestoEl) manifestoEl.classList.remove('orb-transition-hide');
+
+                // ── 2. Hard-set the timeline state to this exact progress ──
+                mainTl.progress(targetProgress, true); // true = suppress callbacks
+
+                // ── 3. Ensure section is fully visible (belt + suspenders) ──
+                gsap.set("#new-agent-section", { autoAlpha: 1, filter: "none" });
+
+                // ── 4. Snap scroll to exact pixel so scrub can't drift on re-enable ──
+                window.scrollTo(0, scrollToPos);
+
+                // ── 5. Run entrance animations (always, whether onStart fired or not) ──
+                if (!agentTriggered) {
+                    agentTriggered = true;
+                    gsap.fromTo("#new-agent-section",
+                        { filter: "brightness(3) blur(8px)" },
+                        { filter: "brightness(1) blur(0px)", duration: 0.8, ease: "power2.out" }
+                    );
+                    gsap.to("#descent-vignette",   { opacity: 0, duration: 0.6, ease: "power2.out" });
+                    gsap.to("#light-shaft",         { opacity: 0, duration: 0.4 });
+                    gsap.fromTo("#agent-selection-title",
+                        { opacity: 0, y: 18, filter: "blur(10px)" },
+                        { opacity: 1, y: 0, filter: "blur(0px)", duration: 1.1, delay: 0.25, ease: "power3.out", clearProps: "filter" }
+                    );
+                }
+
+                // ── 6. Start text animations if not already running ──
+                if (!document.body.classList.contains('agent-anim-active')) {
+                    triggerAgentText();
+                }
+
+                // ── 7. Stash re-enable callback for when text animations finish ──
+                window._agentPinRelease = () => {
+                    window.scrollTo(0, scrollToPos); // re-snap before re-enable
+                    st.enable();                      // re-enable scrub from current pos
+                    window._agentPinRelease = null;
+                };
+            }
+        });
+    });
+}
+
+if (label1) {
+        label1.addEventListener('pointerenter', () => { orbHoverIndex = 1; });
+        label1.addEventListener('pointerleave', () => { if (orbHoverIndex === 1) orbHoverIndex = null; });
+        label1.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            startServicesDive();
+        });
+    }
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    // Skip rendering when the tab is not visible — saves CPU/GPU
+    if (document.hidden) return;
+    const t = clock.getElapsedTime();
+    const now = performance.now();
+    const dt = Math.min((now - _lastFrameTime) / 1000, 0.05); // seconds, capped at 50ms
+    _lastFrameTime = now;
+
+    if (agentVideo && agentVideo.paused) {
+        agentVideo.play().catch(() => {});
+    }
+
+    const pos = bgGeo.attributes.position.array;
+    for(let i=0; i<bgCount; i++) {
+        pos[i*3]   += bgVelArr[i*3]   * dt * 60;
+        pos[i*3+1] += bgVelArr[i*3+1] * dt * 60;
+        pos[i*3+2] += bgVelArr[i*3+2] * dt * 60;
+        if (Math.abs(pos[i*3])>25)   pos[i*3]*=-0.98;
+        if (Math.abs(pos[i*3+1])>25) pos[i*3+1]*=-0.98;
+        if (Math.abs(pos[i*3+2])>15) pos[i*3+2]*=-0.98;
+    }
+    bgGeo.attributes.position.needsUpdate = true;
+    crystals.forEach((c, idx) => {
+        c.mesh.rotation.z += c.rotSpeed * 0.3;
+        if (idx === 0) {
+            const breath = Math.sin(t * 0.3 + idx) * 0.008;
+            c.mesh.scale.setScalar(1 + breath);
+        } else if (idx >= 1 && idx <= 5) {
+            const pulse = Math.sin(t * 0.8 + idx * 0.9) * 0.04;
+            c.mesh.scale.setScalar(1 + pulse);
+            if (c.mesh.material.emissive) {
+                const flickerIntensity = 0.05 + Math.abs(Math.sin(t * 1.2 + idx * 2.3)) * 0.12;
+                c.mesh.material.emissiveIntensity = flickerIntensity;
+            }
+        }
+        depthSpotlight.position.x = Math.sin(t * 0.15) * 1.5;
+        depthSpotlight.position.y = Math.cos(t * 0.1) * 1.0;
+    });
+    
+    const hH = Math.tan((camera.fov*Math.PI)/360)*camera.position.z, hW = hH*(window.innerWidth/window.innerHeight);
+    let targets;
+
+    if (window.innerWidth > 768) {
+        targets = [
+            { x: (hW - 0.8) * motionParams.spread, y: (hH - 2.8) * motionParams.spread }, 
+            { x: (-hW + 2.2) * motionParams.spread, y: (-hH + 1.2) * motionParams.spread }
+        ];
+    } else {
+        targets = [
+            { x: (hW - 0.2) * motionParams.spread, y: (hH - 2.2) * motionParams.spread }, 
+            { x: (-hW + 1.8) * motionParams.spread, y: (-hH + 0.9) * motionParams.spread }
+        ];
+    }
+
+    orbs.forEach((orb, i) => {
+        const d = floatData[i];
+        const isHovered = orbHoverIndex === i;
+        const isDive = servicesDiveActive;
+        const diveFocused = isDive && i === servicesDiveOrbIndex;
+
+        const floatBoost = isDive ? (diveFocused ? 0.28 : 0.52) : (isHovered ? 1.18 : 1.0);
+        const mouseBoost = isDive ? 0 : (isHovered ? 0.6 : 1.0);
+
+        const otherX = (i === 0 ? -9.2 : 9.2) * (window.innerWidth > 768 ? 1.0 : 0.9);
+        const otherY = -6.2 * (window.innerWidth > 768 ? 1.0 : 0.92);
+        const diveDestX = diveFocused ? 0 : otherX;
+        const diveDestY = diveFocused ? 0 : otherY;
+
+        const baseX = isDive ? diveDestX : targets[i].x;
+        const baseY = isDive ? diveDestY : targets[i].y;
+
+        const tX = baseX + Math.cos(t * d.speed + d.phase) * 0.35 * floatBoost + (mouse.x * 0.2) * mouseBoost;
+        const tY = baseY + Math.sin(t * d.speed + d.phase) * 0.35 * floatBoost + (mouse.y * 0.2) * mouseBoost;
+        orb.position.x += (tX + orbEntranceOffset[i].x - orb.position.x) * (isDive ? 0.07 : 0.05);
+        orb.position.y += (tY + orbEntranceOffset[i].y - orb.position.y) * (isDive ? 0.07 : 0.05);
+
+        const baseScale = orb.userData.baseScale || 1;
+        const diveScale = isDive ? (diveFocused ? 1.85 : 0.48) : 1.0;
+        const targetScale = baseScale * (isHovered ? 1.14 : 1.0) * diveScale;
+        orb.scale.x += (targetScale - orb.scale.x) * 0.08;
+        orb.scale.y += (targetScale - orb.scale.y) * 0.08;
+        orb.scale.z += (targetScale - orb.scale.z) * 0.08;
+
+        orb.children.forEach(child => {
+            if (child.userData.isStream) {
+                const pos = child.geometry.attributes.position.array;
+                const data = child.userData;
+                const base = data.baseStreamPos;
+                const count = data.randomSeeds.length;
+
+                // Sine-based oscillation from the stored base positions — never drifts
+                const speedScale = 0.18;
+                const ampScale = 0.006;
+
+                for (let j = 0; j < count; j++) {
+                    const seed = data.randomSeeds[j];
+                    const st = t * speedScale;
+
+                    pos[j * 3]     = base[j * 3]     + Math.sin(st * 1.1 + seed)          * ampScale;
+                    pos[j * 3 + 1] = base[j * 3 + 1] + Math.cos(st * 1.3 - seed * 0.7)    * ampScale;
+                    pos[j * 3 + 2] = base[j * 3 + 2] + Math.sin(st * 0.9 + seed * 1.2)    * ampScale;
+                }
+
+                child.geometry.attributes.position.needsUpdate = true;
+            } else if (!child.isSprite) {
+                const rotSpeed = child.userData.rotSpeed || 0.001;
+                const rotFactor = isDive ? (diveFocused ? 0.06 : 0.18) : (isHovered ? 0.18 : 1.0);
+                child.rotation.y += rotSpeed * rotFactor;
+            }
+
+            const hoverOpacityBoost = isHovered ? 1.25 : 1.0;
+            const diveOpacityBoost = isDive ? (diveFocused ? 1.15 : 0.10) : 1.0;
+            child.material.opacity = (child.isSprite ? 0.9 : 1) * motionParams.visibility * hoverOpacityBoost * diveOpacityBoost;
+
+            if (child.userData.isGlowSprite) {
+                const baseGlow = child.userData.baseGlowScale || child.scale.x;
+                child.scale.set(baseGlow, baseGlow, 1);
+                const glowOpacity = isDive ? (diveFocused ? 1.0 : 0.26) : (isHovered ? 1.0 : 0.72);
+                child.material.opacity = Math.min(1.0, glowOpacity * motionParams.visibility);
+            }
+        });
+
+        const label = document.getElementById(`orb-label-${i}`);
+        if (label) { 
+            orb.getWorldPosition(labelVec); 
+            labelVec.project(camera); 
+            
+            let screenX = (labelVec.x * 0.5 + 0.5) * window.innerWidth;
+            let screenY = (labelVec.y * -0.5 + 0.5) * window.innerHeight;
+
+            if (i === 0 && window.innerWidth > 768) {
+                screenX -= 100; 
+            }
+
+            label.style.left = `${screenX}px`; 
+            label.style.top = `${screenY}px`; 
+            label.style.opacity = servicesDiveActive ? 0 : motionParams.visibility; 
+        }
+    });
+    if (servicesDiveActive) {
+        const focusOrb = orbs[servicesDiveOrbIndex];
+        if (focusOrb) camera.lookAt(focusOrb.position.x, focusOrb.position.y, 0);
+    }
+    renderer.render(scene, camera);
+    
+    if (wallRenderer && wallScene && wallCamera && wallShaderMat) {
+        wallShaderUniforms.time.value += 0.016;
+        wallRenderer.render(wallScene, wallCamera);
+    }
+}
+
+function typeEffect(el, html, speed, cb) {
+    let i = 0; el.innerHTML = ""; el.classList.add('typing');
+    function timer() {
+        if (i < html.length) { if (html.charAt(i) === '<') { i = html.indexOf('>', i) + 1; } else { i++; } el.innerHTML = html.substring(0, i); setTimeout(timer, speed);
+        } else { el.classList.remove('typing'); if (cb) cb(); }
+    }
+    timer();
+}
+
+function runHeroAnimation() { 
+    const titleEl = document.getElementById('type-title');
+    const subEl = document.getElementById('type-sub');
+    
+    titleEl.innerHTML = "";
+    subEl.innerHTML = "";
+    titleEl.classList.remove('typing');
+    subEl.classList.remove('typing');
+
+    const titleText = "Are you Here for a <u>Reason</u> or <u>Reasoning</u>?";
+    const subText = "Are you here to <u>Compete</u> or <u>Dominate</u>?";
+
+    typeEffect(titleEl, titleText, 40, () => {
+        setTimeout(() => { 
+            typeEffect(subEl, subText, 30, () => {
+                setTimeout(() => {
+                    runHeroAnimation();
+                }, 2000); 
+            }); 
+        }, 500);
+    }); 
+}
+
+window.addEventListener('load', () => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    agentTriggered = false;
+    document.body.classList.remove('agent-anim-active');
+    const agentEl = document.getElementById('new-agent-section');
+    if (agentEl) { gsap.set(agentEl, { autoAlpha: 0, clearProps: 'filter' }); }
+    document.querySelectorAll('.agent-text-block').forEach(el => { el.style.opacity = '0'; el.innerHTML = ''; });
+    gsap.set('#agent-selection-title', { opacity: 0, y: 18, filter: 'blur(10px)' });
+    ScrollTrigger.refresh();
+
+    agentVideo = document.getElementById('agent-video');
+    if(agentVideo) {
+        agentVideo.muted = true;
+        agentVideo.loop = true;
+        agentVideo.play().catch(() => {});
+    }
+
+    bindOrbHoverInteractions();
+
+    // Fire entrance on first load
+    playOrbEntrance();
+
+    const overlayEl = document.getElementById('services-dive-overlay');
+    overlayEl?.addEventListener('click', () => exitServicesDive());
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') exitServicesDive();
+    });
+
+    // Initialize ScrollTrigger for the new services content
+   // Initialize ScrollTrigger for the new services content
+    const serviceItems = document.querySelectorAll('.service-item');
+    serviceItems.forEach((item) => {
+        const content = item.querySelector('.service-content');
+        // Select the individual child elements to stagger them
+        const elements = content.querySelectorAll('.service-num, .service-name, .service-details, .contact-wrapper');
+        
+        // Create a timeline for the staggered entrance
+        const tlEnter = gsap.timeline({
+            scrollTrigger: {
+                trigger: item,
+                scroller: "#services-scroll-container",
+                start: "top 85%",
+                end: "center center",
+                scrub: 1
+            }
+        });
+
+        // The Creative Reveal: Slice upwards from a hidden clip-path
+        tlEnter.fromTo(elements, 
+            { 
+                opacity: 0, 
+                y: 80, 
+                rotationX: 45,
+                transformOrigin: "50% 100%",
+                clipPath: "polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)", 
+                filter: "blur(12px)" 
+            },
+            {
+                opacity: 1, 
+                y: 0, 
+                rotationX: 0,
+                clipPath: "polygon(0% -50%, 100% -50%, 100% 150%, 0% 150%)", 
+                filter: "blur(0px)",
+                stagger: 0.15, // Delay between each element appearing
+                ease: "power3.out"
+            }
+        );
+        
+        // Exit animation (fades and pulls the whole block into the distance)
+        gsap.to(content, {
+            scrollTrigger: {
+                trigger: item,
+                scroller: "#services-scroll-container",
+                start: "center center",
+                end: "bottom 15%",
+                scrub: 1
+            },
+            opacity: 0, 
+            y: -120, 
+            scale: 0.85, 
+            filter: "blur(20px)",
+            ease: "power2.in"
+        });
+    });
+    // Setup exit trigger at bottom of scroll container
+    // Trigger exit when user reaches the bottom of the services scroller
+ScrollTrigger.create({
+    trigger: "#services-return-trigger",
+    scroller: "#services-scroll-container",
+    start: "top 90%", // Triggers when the pulsing ring is 10% from the bottom
+    onEnter: () => {
+        exitServicesDive();
+    }
+});
+
+    animate(); 
+    runHeroAnimation(); 
+});
+
+    let _resizeTimer = null;
+    window.addEventListener('resize', () => {
+    clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(() => {
+        camera.aspect = window.innerWidth/window.innerHeight; 
+        camera.updateProjectionMatrix(); 
+        renderer.setSize(window.innerWidth, window.innerHeight); 
+        
+        if (wallCamera && wallRenderer) {
+            wallCamera.aspect = window.innerWidth / window.innerHeight;
+            wallCamera.updateProjectionMatrix();
+            wallRenderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Recalculate all ScrollTrigger positions after resize / orientation change
+        ScrollTrigger.refresh();
+    }, 200);
+});
+
+
+</script>
+
+<script>
+// Glitch Effect logic updated to apply to ALL buttons (Header, Menu, & new Service Cards)
+const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/_+";
+
+function initGlitchButtons() {
+    const contactBtns = document.querySelectorAll(".contact-neural");
+    contactBtns.forEach(btn => {
+        btn.onmouseover = event => {
+            let iteration = 0;
+            const targetBtn = event.currentTarget;
+            const originalText = targetBtn.dataset.value;
+            const textSpan = targetBtn.querySelector('.neural-text');
+            
+            const interval = setInterval(() => {
+                textSpan.innerText = originalText
+                    .split("")
+                    .map((letter, index) => {
+                        if(index < iteration) {
+                            return originalText[index];
+                        }
+                        return letters[Math.floor(Math.random() * 39)];
+                    })
+                    .join("");
+                
+                if(iteration >= originalText.length) {
+                    clearInterval(interval);
+                }
+                
+                iteration += 1 / 3;
+            }, 30);
+        };
+    });
+}
+// Run it initially (it will grab all dynamically added buttons as well since it runs at the end)
+initGlitchButtons();
+
+// ═══════════════════════════════
+// SMOOTH MOMENTUM SCROLL ENGINE
+// ═══════════════════════════════
+(function initSmoothScroll() {
+    const IS_MOBILE     = window.innerWidth <= 768 || ('ontouchstart' in window);
+
+    // Desktop lerp feels cinematic; mobile needs to track finger 1:1 then coast
+    const LERP_DESKTOP  = 0.10;
+    const LERP_MOBILE   = 0.18;   // slightly snappier tracking on touch
+    const SPEED_MULT    = 1.15;
+    const STOP_DELTA    = 0.5;
+
+    let current = window.scrollY;
+    let target  = window.scrollY;
+    let rafId   = null;
+
+    // Velocity tracking for flick momentum on mobile
+    let lastTouchY   = 0;
+    let lastTouchT   = 0;
+    let touchVelY    = 0;   // px/ms at finger-lift
+    let isTouching   = false;
+
+    // Momentum decay after touchend
+    let momentumId   = null;
+    const FRICTION   = 0.92;   // velocity multiplier per frame after lift
+
+    function clamp(v, lo, hi) { return Math.min(Math.max(v, lo), hi); }
+    function maxScroll() { return document.body.scrollHeight - window.innerHeight; }
+
+    function getLerp() { return IS_MOBILE ? LERP_MOBILE : LERP_DESKTOP; }
+
+    // ── Core RAF loop ────────────────────────────────────
+    function tick() {
+        current += (target - current) * getLerp();
+        window.scrollTo(0, current);
+
+        if (Math.abs(target - current) < STOP_DELTA && !isTouching) {
+            current = target;
+            window.scrollTo(0, current);
+            rafId = null;
+            return;
+        }
+        rafId = requestAnimationFrame(tick);
+    }
+
+    function startTick() {
+        if (!rafId) rafId = requestAnimationFrame(tick);
+    }
+
+    function anchor() {
+        // Re-sync to true DOM scroll (prevents snap-back after GSAP jumps)
+        if (!rafId) { current = window.scrollY; target = window.scrollY; }
+    }
+
+    // ── Momentum coast after touch lift ─────────────────
+    function startMomentum() {
+        if (momentumId) cancelAnimationFrame(momentumId);
+        let vel = touchVelY;
+
+        function coast() {
+            if (Math.abs(vel) < 0.3) { momentumId = null; return; }
+            target = clamp(target + vel, 0, maxScroll());
+            vel *= FRICTION;
+            startTick();
+            momentumId = requestAnimationFrame(coast);
+        }
+        momentumId = requestAnimationFrame(coast);
+    }
+
+    // ── Wheel (desktop) ──────────────────────────────────
+    window.addEventListener('wheel', (e) => {
+        if (document.body.classList.contains('services-dive-active')) return;
+        if (document.body.classList.contains('agent-anim-active')) { e.preventDefault(); return; }
+        e.preventDefault();
+        anchor();
+        target = clamp(target + e.deltaY * SPEED_MULT, 0, maxScroll());
+        startTick();
+    }, { passive: false });
+
+    // ── Touch (mobile) ───────────────────────────────────
+    window.addEventListener('touchstart', (e) => {
+        if (document.body.classList.contains('services-dive-active')) return;
+
+        // Cancel any ongoing momentum coast
+        if (momentumId) { cancelAnimationFrame(momentumId); momentumId = null; }
+
+        isTouching  = true;
+        lastTouchY  = e.touches[0].clientY;
+        lastTouchT  = performance.now();
+        touchVelY   = 0;
+
+        // Re-anchor: if GSAP jumped the page, start tracking from real position
+        current = window.scrollY;
+        target  = window.scrollY;
+        // Don't startTick yet — wait for actual movement
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+        // Services dive has its own scroll container — block page scroll but don't interfere
+        if (document.body.classList.contains('services-dive-active')) {
+            e.preventDefault();
+            return;
+        }
+        if (document.body.classList.contains('agent-anim-active')) {
+            e.preventDefault();
+            return;
+        }
+
+        // Prevent native browser scroll from fighting our engine
+        e.preventDefault();
+
+        const y  = e.touches[0].clientY;
+        const t  = performance.now();
+        const dy = lastTouchY - y;          // positive = scroll down
+        const dt = Math.max(t - lastTouchT, 1);
+
+        // EWMA velocity smoothing — stable flick detection without spikes
+        const rawVel = (dy / dt) * 16;
+        touchVelY = touchVelY * 0.5 + rawVel * 0.5;
+
+        target = clamp(target + dy, 0, maxScroll());
+
+        lastTouchY = y;
+        lastTouchT = t;
+
+        startTick();
+    }, { passive: false });   // ← must be non-passive to call preventDefault
+
+    window.addEventListener('touchend', () => {
+        if (document.body.classList.contains('services-dive-active')) return;
+        isTouching = false;
+
+        // Only coast if the flick was meaningful (avoids drift on slow tap)
+        if (Math.abs(touchVelY) > 1.5) {
+            // Convert velocity to a per-frame distance and kick off coast
+            startMomentum();
+        }
+    }, { passive: true });
+
+    window.addEventListener('touchcancel', () => {
+        isTouching = false;
+        touchVelY  = 0;
+    }, { passive: true });
+
+    // Sync when native scroll fires (keyboard, scrollbar, programmatic)
+    window.addEventListener('scroll', () => {
+        if (!rafId && !isTouching) current = window.scrollY;
+    }, { passive: true });
+
+})();
+
+window.addEventListener('beforeunload', () => { window.scrollTo(0, 0); });
+
+// Mobile Menu Logic
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobile-menu');
+const closeMenuBtn = document.getElementById('close-menu');
+const mobileLinks = mobileMenu.querySelectorAll('a');
+
+if (hamburger && mobileMenu && closeMenuBtn) {
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.add('active');
+        mobileMenu.classList.add('active');
+    });
+
+    const closeMenu = () => {
+        hamburger.classList.remove('active');
+        mobileMenu.classList.remove('active');
+    };
+
+    closeMenuBtn.addEventListener('click', closeMenu);
+
+    mobileLinks.forEach(link => {
+        link.addEventListener('click', closeMenu);
+    });
+}
+</script>
+
+
+<script>
+// ── BACKGROUND AUDIO (FORCED AUTOPLAY) ────────────────────────────────────
+(function() {
+    const audio = document.getElementById('bg-audio');
+    const btn   = document.getElementById('sound-toggle');
+    if (!audio || !btn) return;
+
+    audio.volume = 0.4;
+    audio.loop   = true;
+
+    let unlocked = false;
+
+    function unmutedPlay() {
+        audio.muted  = false;
+        audio.volume = 0.4;
+        audio.play().then(() => {
+            unlocked = true;
+            btn.classList.remove('muted');
+        }).catch(() => {});
+    }
+
+    // ── Strategy 1: plain autoplay ──────────────────────────────────────────
+    function tryPlay() {
+        audio.play().then(() => {
+            unlocked = true;
+            btn.classList.remove('muted');
+        }).catch(() => {
+            // ── Strategy 2: muted autoplay → then unmute ───────────────────
+            // Browsers always allow muted autoplay; we unmute immediately after.
+            audio.muted = true;
+            audio.play().then(() => {
+                audio.muted  = false;
+                audio.volume = 0.4;
+                unlocked = true;
+                btn.classList.remove('muted');
+            }).catch(() => {
+                // ── Strategy 3: wait for ANY user gesture ──────────────────
+                const gestures = ['click', 'touchstart', 'keydown', 'scroll', 'mousemove', 'pointerdown'];
+                function onGesture() {
+                    if (unlocked) return;
+                    unmutedPlay();
+                    gestures.forEach(ev => document.removeEventListener(ev, onGesture));
+                }
+                gestures.forEach(ev => document.addEventListener(ev, onGesture, { once: false, passive: true }));
+            });
+        });
+    }
+
+    // Fire on DOMContentLoaded (early), load (fallback), and visibilitychange
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', tryPlay, { once: true });
+    } else {
+        tryPlay();
+    }
+    window.addEventListener('load', () => { if (!unlocked) tryPlay(); }, { once: true });
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && !unlocked) tryPlay();
+    });
+
+    // ── Toggle button ───────────────────────────────────────────────────────
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (audio.paused) {
+            audio.muted = false;
+            audio.play().then(() => { unlocked = true; });
+            btn.classList.remove('muted');
+            btn.setAttribute('aria-label', 'Mute sound');
+        } else {
+            audio.pause();
+            btn.classList.add('muted');
+            btn.setAttribute('aria-label', 'Unmute sound');
+        }
+    });
+})();
+</script>
+</body>
+</html>
